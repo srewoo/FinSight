@@ -1,0 +1,142 @@
+{
+  "identity": {
+    "name": "FinSight",
+    "persona": "The Anti-AI Designer (E1)",
+    "tone": "Dark, Precision, Institutional Grade, AI-Native",
+    "audience": "Indian Retail Investors & Traders",
+    "theme_mode": "dark"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "System Sans-Serif (Bold/Heavy) or Space Grotesk if available",
+      "body": "System Sans-Serif (Regular/Medium)",
+      "mono": "System Monospace (for prices/tickers)"
+    },
+    "scale": {
+      "h1": "text-4xl font-bold tracking-tight text-white",
+      "h2": "text-2xl font-bold text-white",
+      "h3": "text-xl font-semibold text-zinc-100",
+      "body": "text-base text-zinc-300",
+      "caption": "text-sm text-zinc-500",
+      "price_lg": "text-3xl font-mono font-bold text-white",
+      "price_sm": "text-base font-mono font-medium"
+    }
+  },
+  "colors": {
+    "background": {
+      "app": "#09090B",
+      "card": "#18181B",
+      "card_highlight": "#27272A",
+      "overlay": "rgba(0,0,0,0.8)"
+    },
+    "brand": {
+      "primary": "#7C3AED",
+      "primary_foreground": "#FFFFFF",
+      "accent": "#8B5CF6",
+      "ai_glow": "#A78BFA"
+    },
+    "semantic": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "danger": "#EF4444",
+      "info": "#3B82F6",
+      "profit": "#10B981",
+      "loss": "#EF4444",
+      "neutral": "#71717A"
+    },
+    "border": {
+      "default": "#27272A",
+      "active": "#3F3F46"
+    }
+  },
+  "visual_enhancers": {
+    "radius": {
+      "sm": "rounded-sm",
+      "md": "rounded-md",
+      "lg": "rounded-lg",
+      "xl": "rounded-xl",
+      "full": "rounded-full"
+    },
+    "shadows": {
+      "glow": "shadow-[0_0_15px_rgba(124,58,237,0.3)]",
+      "card": "shadow-sm"
+    },
+    "gradients": {
+      "ai_button": "bg-gradient-to-r from-violet-600 to-indigo-600",
+      "background_mesh": "Use radial-gradient overlays sparingly"
+    }
+  },
+  "layout_strategy": {
+    "mobile_container": "flex-1 bg-zinc-950",
+    "safe_area": "pt-12 pb-6 px-4",
+    "spacing": {
+      "section_gap": "gap-8",
+      "card_padding": "p-5",
+      "screen_padding": "px-5"
+    },
+    "grid_system": "Use Flexbox (flex-row, flex-col) for layouts. Avoid CSS Grid in React Native."
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-violet-600 rounded-full py-4 px-6 active:bg-violet-700 items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.2)]",
+      "secondary": "bg-zinc-800 rounded-full py-4 px-6 active:bg-zinc-700 items-center justify-center",
+      "outline": "border border-zinc-700 rounded-full py-4 px-6 active:bg-zinc-900 items-center justify-center",
+      "ghost": "py-2 px-4 active:bg-zinc-800/50 rounded-lg",
+      "text_style": "text-white font-semibold text-base"
+    },
+    "cards": {
+      "base": "bg-zinc-900 border border-zinc-800/50 rounded-2xl p-5 shadow-sm",
+      "interactive": "bg-zinc-900 border border-zinc-800/50 rounded-2xl p-5 active:border-violet-500/50 transition-colors",
+      "glass": "bg-zinc-900/80 border border-white/10 rounded-2xl p-5"
+    },
+    "inputs": {
+      "base": "bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white placeholder-zinc-500 focus:border-violet-500",
+      "search": "bg-zinc-900 rounded-xl px-4 py-3 text-white flex-row items-center gap-3"
+    },
+    "navigation": {
+      "bottom_tab": "bg-zinc-950 border-t border-zinc-900 h-20 pt-2",
+      "header": "bg-zinc-950/90 border-b border-zinc-900/50 backdrop-blur-md"
+    },
+    "badges": {
+      "buy": "bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full",
+      "sell": "bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-full",
+      "hold": "bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full",
+      "ai": "bg-violet-500/10 border border-violet-500/20 px-3 py-1 rounded-full"
+    }
+  },
+  "motion": {
+    "types": [
+      "Pressable scale on press (0.98)",
+      "Screen transitions: Slide from right",
+      "Skeleton loading for data",
+      "Fade in for charts"
+    ],
+    "library": "react-native-reanimated (if needed) or LayoutAnimation"
+  },
+  "image_assets": {
+    "hero_background": "https://images.unsplash.com/photo-1684610529682-553625a1ffed?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGRhcmslMjBmaW5hbmNlJTIwdGVjaG5vbG9neSUyMGdyYXBofGVufDB8fHx8MTc3MTg1NjI1MHww&ixlib=rb-4.1.0&q=85",
+    "market_sentiment_bg": "https://images.unsplash.com/photo-1764735904830-28f8826828ca?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwxfHxidWxsJTIwYW5kJTIwYmVhciUyMHN0b2NrJTIwbWFya2V0JTIwc3R5bGl6ZWR8ZW58MHx8fHwxNzcxODU2MjUwfDA&ixlib=rb-4.1.0&q=85",
+    "chart_placeholder": "https://images.pexels.com/photos/10628030/pexels-photo-10628030.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  },
+  "icons": {
+    "library": "Lucide React Native (lucide-react-native) or Expo Vector Icons",
+    "style": "Stroke width 1.5 or 2, color matches text hierarchy"
+  },
+  "instructions_to_main_agent": [
+    "CRITICAL: This is a REACT NATIVE EXPO project. Do NOT use HTML tags (div, span, img). Use <View>, <Text>, <Image>, <Pressable>, <ScrollView>.",
+    "Use 'nativewind' for styling (className='...'). Ensure tailwind.config.js is configured for content: ['./App.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'].",
+    "Do NOT use 'shadcn/ui' library directly as it is for web. BUILD 'Shadcn-like' components using standard React Native primitives with the styles defined in 'components' section above.",
+    "For Charts: Use 'react-native-chart-kit' or 'react-native-gifted-charts' (check package.json or install if needed).",
+    "For Navigation: Use 'expo-router' (file-based routing in /app directory).",
+    "For AI Analysis: Create a visually distinct 'AI Command Center' card with the 'glow' shadow and violet accents.",
+    "Ensure all text color is explicitly set (e.g., text-white, text-zinc-400) because default text color in RN is black.",
+    "Data-TestID: Add testID='...' prop to all interactive elements."
+  ],
+  "universal_guidelines": [
+    "Don't make generic centered layouts. Use padding and asymmetry.",
+    "Use dark colors independently, avoid muddy gradients.",
+    "Every interaction needs feedback (use Pressable style prop for opacity change).",
+    "Use 2-3x more spacing than typical designs.",
+    "Never use AI assistant Emojis."
+  ]
+}

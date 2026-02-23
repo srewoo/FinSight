@@ -1,0 +1,91 @@
+{
+  "summary": "Tested NEW features: AI Auto-Recommendations, Scan tab, Support/Resistance levels, ADX indicator, NSE/BSE support. Backend: 11/12 tests passed. Frontend: All NEW features working correctly.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/ai/analyze-chart-image",
+        "issue": "Chart image analysis fails with 520 error. GPT-5.2 API rejects image/jpeg MIME type - expects 'application/pdf' format. Error: 'Invalid file data: messages[2].content[0].file.file_data. Expected a base64-encoded data URL with an application/pdf MIME type, but got unsupported MIME type image/jpeg'",
+        "priority": "HIGH",
+        "note": "Third-party integration issue with LLM image file handling"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_new_features.py",
+    "/app/test_reports/pytest/new_features_results.xml",
+    "/tmp/new_features_test.log"
+  ],
+  "action_items": [
+    "Fix chart image analysis endpoint: Change FileContent MIME type from 'image/jpeg' to expected format or use different approach for GPT-5.2 image processing",
+    "Consider using web_search to find correct LLM provider file upload format for images"
+  ],
+  "critical_code_review_comments": [
+    "All NEW features implemented correctly",
+    "Backend endpoints structure is correct",
+    "Frontend UI properly displays all NEW features",
+    "ADX indicator correctly implemented in backend technicals calculation",
+    "Support/Resistance calculation using pivot points working correctly",
+    "NSE and BSE stock support fully functional"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_new_features.py (created new test file)"
+  ],
+  "success_rate": {
+    "backend": "92% (11/12 tests passed)",
+    "frontend": "100% (All NEW features working)"
+  },
+  "seed_data_creation": "No seed data created. All tests use real yfinance data and live API calls.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Previous basic tests (home, search, stock detail, watchlist, portfolio) passed. This iteration focused on NEW features only. Chart image analysis endpoint has AI MIME type issue - needs correct image format for vision API.",
+  "features_tested": {
+    "backend": {
+      "passed": [
+        "GET /api/ai/auto-recommendations - Analyzes 40+ NSE stocks with 6-month candle data",
+        "Auto-recommendations returns buy/sell/hold signals with confidence, RSI, ADX, MACD, support_resistance",
+        "Support/Resistance levels in stock quote (R1/R2/R3, S1/S2/S3, Pivot)",
+        "Support/Resistance period highs/lows (1M, 6M, 52W)",
+        "ADX indicator in technicals endpoint",
+        "NSE and BSE stock search returns both exchanges",
+        "BSE stock quote working (RELIANCE.BO, TCS.BO)",
+        "BSE stock technicals working"
+      ],
+      "failed": [
+        "POST /api/ai/analyze-chart-image - GPT-5.2 MIME type rejection"
+      ]
+    },
+    "frontend": {
+      "passed": [
+        "All 6 tabs visible: Home, Search, AI Picks, Scan, Watchlist, Portfolio",
+        "AI Picks tab loads with summary stats (Analyzed, Buy Signals, Sell Signals, Sentiment)",
+        "AI Picks displays 24 buy recommendations with confidence bars",
+        "AI Picks shows S/R levels (S1, R1, 6M High, 6M Low) on each recommendation",
+        "AI Picks displays technical indicators (RSI, ADX, MACD) for each stock",
+        "Scan tab shows Camera and Gallery buttons (both visible and clickable)",
+        "Scan tab shows placeholder 'No Chart Selected'",
+        "Stock detail page displays Support & Resistance section",
+        "Stock detail shows R1/R2/R3 resistance levels",
+        "Stock detail shows S1/S2/S3 support levels",
+        "Stock detail shows Pivot point",
+        "Stock detail shows Period highs/lows (1M High/Low, 6M High/Low, 52W High/Low)",
+        "Technical Indicators section shows RSI (14), MACD, Bollinger Bands, Moving Averages"
+      ],
+      "failed": []
+    }
+  },
+  "screenshots": [
+    "/tmp/home_screen.png - Home screen with NIFTY 50 and SENSEX indices",
+    "/tmp/ai_picks_tab.png - AI Picks tab with buy recommendations showing confidence bars and S/R levels",
+    "/tmp/scan_tab.png - Scan tab with Camera and Gallery buttons",
+    "/tmp/stock_detail_sr.png - Stock detail page showing Support/Resistance levels and Period highs/lows"
+  ],
+  "backend_test_execution_time": "28.37 seconds",
+  "ai_auto_recommendations_note": "The auto-recommendations endpoint analyzes 40+ stocks and takes 30-60 seconds. During frontend test, it analyzed 39 stocks and returned 24 buy signals, 1 sell signal, with Bullish market sentiment."
+}
