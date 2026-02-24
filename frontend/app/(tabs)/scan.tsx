@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { api } from '../../src/api';
 import { colors } from '../../src/theme';
+import SEBIDisclaimerBanner from '../../src/components/SEBIDisclaimerBanner';
+import SEBIDisclaimerGate from '../../src/components/SEBIDisclaimerModal';
 
 interface ChartAnalysis {
   prediction: string; confidence: number; trend: string; patterns_identified: string[];
@@ -78,6 +80,7 @@ export default function ScanScreen() {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <SEBIDisclaimerGate>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Chart Scanner</Text>
@@ -215,15 +218,11 @@ export default function ScanScreen() {
               </View>
             )}
 
-            <View style={styles.disclaimer}>
-              <Ionicons name="information-circle" size={14} color={colors.textMuted} />
-              <Text style={styles.disclaimerText}>
-                Chart analysis is based on visual pattern recognition. Results may vary. Not financial advice.
-              </Text>
-            </View>
+            <SEBIDisclaimerBanner />
           </View>
         )}
       </ScrollView>
+      </SEBIDisclaimerGate>
     </SafeAreaView>
   );
 }

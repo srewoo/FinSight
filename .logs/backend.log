@@ -1,49 +1,19 @@
 INFO:     Will watch for changes in these directories: ['/Users/sharajrewoo/DemoReposQA/Neural/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [50803] using StatReload
+INFO:     Started reloader process [14696] using StatReload
 /Users/sharajrewoo/DemoReposQA/Neural/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
   warnings.warn(
-INFO:     Started server process [50808]
+INFO:     Started server process [14701]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:55791 - "GET /api/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55812 - "GET / HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:55876 - "OPTIONS /api/market/indices HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55877 - "OPTIONS /api/market/top-movers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55877 - "GET /api/market/indices HTTP/1.1" 200 OK
-2026-02-23 21:43:05,086 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
-INFO:     127.0.0.1:55876 - "GET /api/market/top-movers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55899 - "OPTIONS /api/ai/auto-recommendations HTTP/1.1" 200 OK
-2026-02-23 21:43:20,819 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
-INFO:     127.0.0.1:55899 - "GET /api/ai/auto-recommendations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55901 - "OPTIONS /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55901 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55974 - "OPTIONS /api/settings/test HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55974 - "POST /api/settings/test HTTP/1.1" 503 Service Unavailable
-INFO:     127.0.0.1:55974 - "POST /api/settings HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:55974 - "POST /api/settings/test HTTP/1.1" 503 Service Unavailable
-INFO:     127.0.0.1:55994 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61216 - "OPTIONS /api/ai/auto-recommendations HTTP/1.1" 200 OK
-2026-02-23 22:18:51,335 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
-INFO:     127.0.0.1:61216 - "GET /api/ai/auto-recommendations HTTP/1.1" 200 OK
-WARNING:  StatReload detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [50808]
-/Users/sharajrewoo/DemoReposQA/Neural/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [74296]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:58874 - "OPTIONS /api/market/indices HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58875 - "OPTIONS /api/market/top-movers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58874 - "GET /api/market/indices HTTP/1.1" 200 OK
-2026-02-23 23:42:54,294 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
-INFO:     127.0.0.1:58875 - "GET /api/market/top-movers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58892 - "OPTIONS /api/ai/auto-recommendations HTTP/1.1" 200 OK
-2026-02-23 23:43:00,756 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
-INFO:     127.0.0.1:58892 - "GET /api/ai/auto-recommendations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59156 - "GET /api/market/indices HTTP/1.1" 200 OK
-2026-02-23 23:44:49,979 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
-INFO:     127.0.0.1:59157 - "GET /api/market/top-movers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50391 - "GET /api/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50560 - "OPTIONS /api/broker/status HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50560 - "OPTIONS /api/market/indices HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50562 - "OPTIONS /api/market/top-movers HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50562 - "OPTIONS /api/market/news?limit=10 HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50560 - "OPTIONS /api/market/sector-heatmap HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50664 - "OPTIONS /api/ai/auto-recommendations HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50664 - "OPTIONS /api/market/breakouts HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50676 - "OPTIONS /api/user/accept-disclaimer HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50713 - "OPTIONS /api/settings HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50715 - "OPTIONS /api/user/quota HTTP/1.1" 400 Bad Request

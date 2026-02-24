@@ -15,3 +15,8 @@ def api_client():
 def base_url():
     """Base URL for API endpoints"""
     return BASE_URL
+
+@pytest.fixture
+def auth_headers():
+    """Headers with a mock Firebase token."""
+    return {"Authorization": "Bearer test_firebase_token", "Content-Type": "application/json"}

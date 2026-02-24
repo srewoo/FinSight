@@ -1,7 +1,7 @@
 yarn run v1.22.22
 $ expo start --port 8082
 env: load .env
-env: export EXPO_TUNNEL_SUBDOMAIN EXPO_PACKAGER_HOSTNAME EXPO_PUBLIC_BACKEND_URL EXPO_USE_FAST_RESOLVER METRO_CACHE_ROOT
+env: export EXPO_TUNNEL_SUBDOMAIN EXPO_PACKAGER_HOSTNAME EXPO_PUBLIC_BACKEND_URL EXPO_USE_FAST_RESOLVER METRO_CACHE_ROOT EXPO_PUBLIC_FIREBASE_API_KEY EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN EXPO_PUBLIC_FIREBASE_PROJECT_ID EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID EXPO_PUBLIC_FIREBASE_APP_ID
 Starting project at /Users/sharajrewoo/DemoReposQA/Neural/frontend
 Fast resolver is enabled.
 Starting Metro Bundler
@@ -12,50 +12,20 @@ Your project may not work correctly until you install the expected versions of t
 Waiting on http://localhost:8082
 Logs for your project will appear below.
 Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.5% (417/587)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 64.4% (464/578)
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
 λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web node_modules/expo-router/entry.js ▓▓░░░░░░░░░░░░░░ 16.4% (110/272)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.8% ( 11/120)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 53.3% (424/581)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓░░░░░░░░░ 49.7% (382/542)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 93.1% (862/902)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 90.9% (735/771)
-λ Bundled 11822ms node_modules/expo-router/node/render.js (893 modules)
+λ Bundled 6408ms node_modules/expo-router/node/render.js (915 modules)
+λ Bundled 3075ms node_modules/expo-router/node/render.js (1 module)
 "shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 12676ms node_modules/expo-router/entry.js (941 modules)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 54.7% (461/636)
-Web Bundled 3006ms node_modules/expo-router/entry.js (942 modules)
- LOG  [web] Logs will appear in the browser console
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 95.2% (930/955)
 Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web Bundled 5966ms node_modules/expo-router/entry.js (1 module)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ Bundled 6003ms node_modules/expo-router/node/render.js (1 module)
 "shadow*" style props are deprecated. Use "boxShadow".
-λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
-Web Bundled 2819ms node_modules/expo-router/entry.js (1 module)
- LOG  [web] Logs will appear in the browser console
-[metro-file-map] Cache write error
-: Error: ENOSPC: no space left on device, open '/var/folders/vm/tyqc66z12zq7ckqgvg6hqpxw0000gp/T/metro-file-map-fe4b308f365966876cf345531df27685-787e21b910323ccc82bab0d16d5ce9f4'
-    at open (node:internal/fs/promises:639:25)
-    at Object.writeFile (node:internal/fs/promises:1212:14)
-    at /Users/sharajrewoo/DemoReposQA/Neural/frontend/node_modules/metro-file-map/src/cache/DiskCacheManager.js:80:11 {
-  errno: -28,
-  code: 'ENOSPC',
-  syscall: 'open',
-  path: '/var/folders/vm/tyqc66z12zq7ckqgvg6hqpxw0000gp/T/metro-file-map-fe4b308f365966876cf345531df27685-787e21b910323ccc82bab0d16d5ce9f4'
-}
-› Detected a change in metro.config.js. Restart the server to see the new results.
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ Bundled 5685ms node_modules/expo-router/node/render.js (1 module)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-"shadow*" style props are deprecated. Use "boxShadow".
-λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
-Web Bundled 6280ms node_modules/expo-router/entry.js (1 module)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web Bundled 3030ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 7747ms node_modules/expo-router/entry.js (955 modules)
+Error: Premature close
+    at onclose (node:internal/streams/end-of-stream:159:30)
+    at processTicksAndRejections (node:internal/process/task_queues:77:11)
+Web Bundled 4368ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 3219ms node_modules/expo-router/entry.js (962 modules)
  LOG  [web] Logs will appear in the browser console

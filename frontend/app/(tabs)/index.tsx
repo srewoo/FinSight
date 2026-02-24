@@ -7,6 +7,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../src/api';
 import { colors, formatCurrency } from '../../src/theme';
+import SectorHeatmap from '../../src/components/SectorHeatmap';
+import NewsCard from '../../src/components/NewsCard';
 
 interface IndexData {
   symbol: string; name: string; price: number; change: number; change_percent: number;
@@ -20,6 +22,9 @@ export default function HomeScreen() {
   const [indices, setIndices] = useState<IndexData[]>([]);
   const [gainers, setGainers] = useState<StockMover[]>([]);
   const [losers, setLosers] = useState<StockMover[]>([]);
+  const [newsArticles, setNewsArticles] = useState<any[]>([]);
+  const [sectors, setSectors] = useState<any[]>([]);
+  const [sectorBreadth, setSectorBreadth] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -38,6 +43,12 @@ export default function HomeScreen() {
       setLoading(false);
       setRefreshing(false);
     }
+    // Lazy-load news + heatmap (non-blocking)
+    api.getMarketNews(10).then(res => setNewsArticles(res.articles || [])).catch(() => { });
+    api.getSectorHeatmap().then(res => {
+      setSectors(res.sectors || []);
+      setSectorBreadth(res.market_breadth || null);
+    }).catch(() => { });
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -163,6 +174,33 @@ export default function HomeScreen() {
             <Ionicons name="arrow-forward" size={16} color="#FFF" />
           </TouchableOpacity>
         </View>
+
+        {/* Sector Heatmap */}
+        {sectors.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>Sector Performance</Text>
+              <View style={styles.liveBadge}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveText}>5D</Text>
+              </View>
+            </View>
+            <SectorHeatmap sectors={sectors} market_breadth={sectorBreadth} />
+          </View>
+        )}
+
+        {/* Market News */}
+        {newsArticles.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>Market News</Text>
+              <Ionicons name="newspaper-outline" size={18} color={colors.textMuted} />
+            </View>
+            {newsArticles.slice(0, 6).map((article, i) => (
+              <NewsCard key={i} article={article} />
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -201,4 +239,9 @@ const styles = StyleSheet.create({
   aiPromoDesc: { color: colors.textMuted, fontSize: 13, marginTop: 4, lineHeight: 19 },
   aiPromoBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, borderRadius: 30, paddingVertical: 14, marginTop: 16, gap: 8 },
   aiPromoBtnText: { color: '#FFF', fontSize: 15, fontWeight: '700' },
+  section: { marginTop: 24 },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
+  liveBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.profit },
+  liveText: { color: colors.textMuted, fontSize: 12 },
 });

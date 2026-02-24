@@ -1,3 +1,4 @@
+// app/index.tsx — Auth removed: always redirect to tabs
 import { Redirect } from 'expo-router';
 
 export default function Index() {

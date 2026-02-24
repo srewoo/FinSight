@@ -8,6 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-gifted-charts';
 import { api } from '../../src/api';
 import { colors, formatCurrency, formatLargeNumber } from '../../src/theme';
+import SEBIDisclaimerBanner from '../../src/components/SEBIDisclaimerBanner';
+import NewsCard from '../../src/components/NewsCard';
+import OptionChainTable from '../../src/components/OptionChainTable';
+import GreeksDisplay from '../../src/components/GreeksDisplay';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -42,6 +46,12 @@ export default function StockDetailScreen() {
   const [technicals, setTechnicals] = useState<Technicals | null>(null);
   const [supportResistance, setSupportResistance] = useState<any>(null);
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
+  const [fundamentals, setFundamentals] = useState<any>(null);
+  const [stockNews, setStockNews] = useState<any[]>([]);
+  const [optionChain, setOptionChain] = useState<any>(null);
+  const [selectedExpiry, setSelectedExpiry] = useState<string | null>(null);
+  const [greeks, setGreeks] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'fundamentals' | 'news' | 'fno'>('overview');
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('1mo');
@@ -74,6 +84,13 @@ export default function StockDetailScreen() {
     } finally {
       setLoading(false);
     }
+    // Lazy-load non-critical data
+    api.getFundamentals(decodedSymbol).then(res => setFundamentals(res.fundamentals)).catch(() => { });
+    api.getStockNews(decodedSymbol, 8).then(res => setStockNews(res.articles || [])).catch(() => { });
+    api.getOptionChain(decodedSymbol).then(res => {
+      setOptionChain(res);
+      if (res.expiry_dates?.[0]) setSelectedExpiry(res.expiry_dates[0]);
+    }).catch(() => { });
   };
 
   const loadChart = async (period: string) => {
@@ -143,6 +160,13 @@ export default function StockDetailScreen() {
   const recColor = aiResult?.recommendation === 'BUY' ? colors.profit
     : aiResult?.recommendation === 'SELL' ? colors.loss : colors.warning;
 
+  const TABS: Array<{ key: 'overview' | 'fundamentals' | 'news' | 'fno'; label: string }> = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'fundamentals', label: 'Fundamentals' },
+    { key: 'news', label: 'News' },
+    { key: 'fno', label: 'F&O' },
+  ];
+
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -177,7 +201,20 @@ export default function StockDetailScreen() {
           </View>
         </View>
 
-        {/* Chart */}
+        {/* Tab bar */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabRow}>
+          {TABS.map(tab => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+              onPress={() => setActiveTab(tab.key)}
+            >
+              <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Chart (always shown) */}
         <View style={styles.chartCard}>
           <View style={styles.periodRow}>
             {periods.map((p) => (
@@ -220,300 +257,231 @@ export default function StockDetailScreen() {
           )}
         </View>
 
-        {/* Key Stats */}
-        <View style={styles.statsCard}>
-          <Text style={styles.cardTitle}>Key Statistics</Text>
-          <View style={styles.statsGrid}>
-            <StatItem label="Open" value={formatCurrency(quote?.open)} />
-            <StatItem label="High" value={formatCurrency(quote?.high)} />
-            <StatItem label="Low" value={formatCurrency(quote?.low)} />
-            <StatItem label="Prev Close" value={formatCurrency(quote?.prev_close)} />
-            <StatItem label="Volume" value={quote?.volume?.toLocaleString('en-IN') || '—'} />
-            <StatItem label="P/E Ratio" value={quote?.pe_ratio ? String(quote.pe_ratio) : '—'} />
-            <StatItem label="52W High" value={formatCurrency(quote?.fifty_two_week_high)} />
-            <StatItem label="52W Low" value={formatCurrency(quote?.fifty_two_week_low)} />
-            <StatItem label="Market Cap" value={formatLargeNumber(quote?.market_cap)} />
-            <StatItem label="Sector" value={quote?.sector || '—'} />
-          </View>
-        </View>
-
-        {/* Support & Resistance Levels */}
-        {supportResistance && (
-          <View style={styles.srCard}>
-            <Text style={styles.cardTitle}>Support & Resistance</Text>
-            <View style={styles.srGrid}>
-              <View style={styles.srSection}>
-                <Text style={[styles.srSectionTitle, { color: colors.loss }]}>Resistance</Text>
-                <View style={styles.srLevel}>
-                  <Text style={styles.srLevelLabel}>R3</Text>
-                  <Text style={styles.srLevelValue}>{formatCurrency(supportResistance.resistance?.r3)}</Text>
-                </View>
-                <View style={styles.srLevel}>
-                  <Text style={styles.srLevelLabel}>R2</Text>
-                  <Text style={styles.srLevelValue}>{formatCurrency(supportResistance.resistance?.r2)}</Text>
-                </View>
-                <View style={styles.srLevel}>
-                  <Text style={styles.srLevelLabel}>R1</Text>
-                  <Text style={styles.srLevelValue}>{formatCurrency(supportResistance.resistance?.r1)}</Text>
-                </View>
-              </View>
-              <View style={styles.srPivotCol}>
-                <Text style={styles.srPivotLabel}>Pivot</Text>
-                <Text style={styles.srPivotValue}>{formatCurrency(supportResistance.pivot)}</Text>
-              </View>
-              <View style={styles.srSection}>
-                <Text style={[styles.srSectionTitle, { color: colors.profit }]}>Support</Text>
-                <View style={styles.srLevel}>
-                  <Text style={styles.srLevelLabel}>S1</Text>
-                  <Text style={styles.srLevelValue}>{formatCurrency(supportResistance.support?.s1)}</Text>
-                </View>
-                <View style={styles.srLevel}>
-                  <Text style={styles.srLevelLabel}>S2</Text>
-                  <Text style={styles.srLevelValue}>{formatCurrency(supportResistance.support?.s2)}</Text>
-                </View>
-                <View style={styles.srLevel}>
-                  <Text style={styles.srLevelLabel}>S3</Text>
-                  <Text style={styles.srLevelValue}>{formatCurrency(supportResistance.support?.s3)}</Text>
-                </View>
+        {/* --- OVERVIEW TAB --- */}
+        {activeTab === 'overview' && (
+          <>
+            {/* Key Stats */}
+            <View style={styles.statsCard}>
+              <Text style={styles.cardTitle}>Key Statistics</Text>
+              <View style={styles.statsGrid}>
+                <StatItem label="Open" value={formatCurrency(quote?.open)} />
+                <StatItem label="High" value={formatCurrency(quote?.high)} />
+                <StatItem label="Low" value={formatCurrency(quote?.low)} />
+                <StatItem label="Prev Close" value={formatCurrency(quote?.prev_close)} />
+                <StatItem label="Volume" value={quote?.volume?.toLocaleString('en-IN') || '—'} />
+                <StatItem label="P/E Ratio" value={quote?.pe_ratio ? String(quote.pe_ratio) : '—'} />
+                <StatItem label="52W High" value={formatCurrency(quote?.fifty_two_week_high)} />
+                <StatItem label="52W Low" value={formatCurrency(quote?.fifty_two_week_low)} />
+                <StatItem label="Market Cap" value={formatLargeNumber(quote?.market_cap)} />
+                <StatItem label="Sector" value={quote?.sector || '—'} />
               </View>
             </View>
-            {/* Period Highs & Lows */}
-            {supportResistance.period_highs_lows && (
-              <View style={styles.periodHLGrid}>
-                <View style={styles.periodHLItem}>
-                  <Text style={styles.periodHLLabel}>1M High</Text>
-                  <Text style={[styles.periodHLValue, { color: colors.profit }]}>{formatCurrency(supportResistance.period_highs_lows.high_1m)}</Text>
-                </View>
-                <View style={styles.periodHLItem}>
-                  <Text style={styles.periodHLLabel}>1M Low</Text>
-                  <Text style={[styles.periodHLValue, { color: colors.loss }]}>{formatCurrency(supportResistance.period_highs_lows.low_1m)}</Text>
-                </View>
-                <View style={styles.periodHLItem}>
-                  <Text style={styles.periodHLLabel}>6M High</Text>
-                  <Text style={[styles.periodHLValue, { color: colors.profit }]}>{formatCurrency(supportResistance.period_highs_lows.high_6m)}</Text>
-                </View>
-                <View style={styles.periodHLItem}>
-                  <Text style={styles.periodHLLabel}>6M Low</Text>
-                  <Text style={[styles.periodHLValue, { color: colors.loss }]}>{formatCurrency(supportResistance.period_highs_lows.low_6m)}</Text>
-                </View>
-                <View style={styles.periodHLItem}>
-                  <Text style={styles.periodHLLabel}>52W High</Text>
-                  <Text style={[styles.periodHLValue, { color: colors.profit }]}>{formatCurrency(supportResistance.period_highs_lows.high_52w)}</Text>
-                </View>
-                <View style={styles.periodHLItem}>
-                  <Text style={styles.periodHLLabel}>52W Low</Text>
-                  <Text style={[styles.periodHLValue, { color: colors.loss }]}>{formatCurrency(supportResistance.period_highs_lows.low_52w)}</Text>
+
+            {/* Support & Resistance Levels */}
+            {supportResistance && (
+              <View style={styles.srCard}>
+                <Text style={styles.cardTitle}>Support & Resistance</Text>
+                <View style={styles.srGrid}>
+                  <View style={styles.srSection}>
+                    <Text style={[styles.srSectionTitle, { color: colors.loss }]}>Resistance</Text>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>R3</Text><Text style={styles.srLevelValue}>{formatCurrency(supportResistance.resistance?.r3)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>R2</Text><Text style={styles.srLevelValue}>{formatCurrency(supportResistance.resistance?.r2)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>R1</Text><Text style={styles.srLevelValue}>{formatCurrency(supportResistance.resistance?.r1)}</Text></View>
+                  </View>
+                  <View style={styles.srPivotCol}>
+                    <Text style={styles.srPivotLabel}>Pivot</Text>
+                    <Text style={styles.srPivotValue}>{formatCurrency(supportResistance.pivot)}</Text>
+                  </View>
+                  <View style={styles.srSection}>
+                    <Text style={[styles.srSectionTitle, { color: colors.profit }]}>Support</Text>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>S1</Text><Text style={styles.srLevelValue}>{formatCurrency(supportResistance.support?.s1)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>S2</Text><Text style={styles.srLevelValue}>{formatCurrency(supportResistance.support?.s2)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>S3</Text><Text style={styles.srLevelValue}>{formatCurrency(supportResistance.support?.s3)}</Text></View>
+                  </View>
                 </View>
               </View>
             )}
-          </View>
+
+            {/* Technical Indicators */}
+            {technicals && (
+              <View style={styles.techCard}>
+                <Text style={styles.cardTitle}>Technical Indicators</Text>
+                <View style={styles.techRow}>
+                  <View style={styles.techLabel}><Text style={styles.techName}>RSI (14)</Text><Text style={styles.techValue}>{technicals.rsi}</Text></View>
+                  <View style={[styles.techSignal, { backgroundColor: technicals.rsi_signal === 'Overbought' ? 'rgba(239,68,68,0.12)' : technicals.rsi_signal === 'Oversold' ? 'rgba(16,185,129,0.12)' : 'rgba(113,113,122,0.12)' }]}>
+                    <Text style={[styles.techSignalText, { color: technicals.rsi_signal === 'Overbought' ? colors.loss : technicals.rsi_signal === 'Oversold' ? colors.profit : colors.neutral }]}>{technicals.rsi_signal}</Text>
+                  </View>
+                </View>
+                <View style={styles.techRow}>
+                  <View style={styles.techLabel}><Text style={styles.techName}>MACD</Text><Text style={styles.techValue}>H: {technicals.macd.histogram}</Text></View>
+                  <View style={[styles.techSignal, { backgroundColor: technicals.macd.signal === 'Bullish' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)' }]}>
+                    <Text style={[styles.techSignalText, { color: technicals.macd.signal === 'Bullish' ? colors.profit : colors.loss }]}>{technicals.macd.signal}</Text>
+                  </View>
+                </View>
+                <View style={styles.techRow}>
+                  <View style={styles.techLabel}><Text style={styles.techName}>SMA 20</Text><Text style={styles.techValue}>{formatCurrency(technicals.moving_averages.sma20)}</Text></View>
+                  <View style={[styles.techSignal, { backgroundColor: technicals.price_vs_sma20 === 'Above' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)' }]}>
+                    <Text style={[styles.techSignalText, { color: technicals.price_vs_sma20 === 'Above' ? colors.profit : colors.loss }]}>Price {technicals.price_vs_sma20}</Text>
+                  </View>
+                </View>
+                <View style={styles.techRow}>
+                  <View style={styles.techLabel}><Text style={styles.techName}>Bollinger</Text><Text style={styles.techValue}>{formatCurrency(technicals.bollinger_bands.lower)} – {formatCurrency(technicals.bollinger_bands.upper)}</Text></View>
+                  <View style={[styles.techSignal, { backgroundColor: technicals.bollinger_bands.signal === 'Overbought' ? 'rgba(239,68,68,0.12)' : technicals.bollinger_bands.signal === 'Oversold' ? 'rgba(16,185,129,0.12)' : 'rgba(113,113,122,0.12)' }]}>
+                    <Text style={[styles.techSignalText, { color: technicals.bollinger_bands.signal === 'Overbought' ? colors.loss : technicals.bollinger_bands.signal === 'Oversold' ? colors.profit : colors.neutral }]}>{technicals.bollinger_bands.signal}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* AI Analysis Section */}
+            <View style={styles.aiCard}>
+              <View style={styles.aiHeader}>
+                <View style={styles.aiTitleRow}>
+                  <Ionicons name="sparkles" size={20} color={colors.aiGlow} />
+                  <Text style={styles.aiTitle}>AI Analysis</Text>
+                </View>
+              </View>
+              <View style={styles.aiTimeframeRow}>
+                <TouchableOpacity style={[styles.tfBtn, aiTimeframe === 'short' && styles.tfBtnActive]} onPress={() => setAiTimeframe('short')} testID="ai-timeframe-short">
+                  <Text style={[styles.tfBtnText, aiTimeframe === 'short' && styles.tfBtnTextActive]}>Short Term</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.tfBtn, aiTimeframe === 'long' && styles.tfBtnActive]} onPress={() => setAiTimeframe('long')} testID="ai-timeframe-long">
+                  <Text style={[styles.tfBtnText, aiTimeframe === 'long' && styles.tfBtnTextActive]}>Long Term</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style={styles.analyzeBtn} onPress={runAI} disabled={aiLoading} testID="run-ai-analysis-btn" activeOpacity={0.8}>
+                {aiLoading ? (
+                  <View style={styles.aiLoadingRow}><ActivityIndicator color="#FFF" size="small" /><Text style={styles.analyzeBtnText}>Analyzing...</Text></View>
+                ) : (
+                  <View style={styles.aiLoadingRow}><Ionicons name="sparkles" size={18} color="#FFF" /><Text style={styles.analyzeBtnText}>Get AI Prediction</Text></View>
+                )}
+              </TouchableOpacity>
+              {aiResult && (
+                <View style={styles.aiResult}>
+                  <View style={[styles.recBadge, { backgroundColor: recColor + '18', borderColor: recColor + '40' }]}>
+                    <Ionicons name={aiResult.recommendation === 'BUY' ? 'arrow-up-circle' : aiResult.recommendation === 'SELL' ? 'arrow-down-circle' : 'pause-circle'} size={28} color={recColor} />
+                    <View style={{ marginLeft: 12 }}>
+                      <Text style={[styles.recText, { color: recColor }]}>{aiResult.recommendation}</Text>
+                      <Text style={styles.recConfidence}>Confidence: {aiResult.confidence}%</Text>
+                    </View>
+                  </View>
+                  <View style={styles.targetRow}>
+                    <View style={styles.targetCol}><Text style={styles.targetLabel}>Target Price</Text><Text style={[styles.targetValue, { color: colors.profit }]}>{formatCurrency(aiResult.target_price)}</Text></View>
+                    <View style={styles.targetCol}><Text style={styles.targetLabel}>Stop Loss</Text><Text style={[styles.targetValue, { color: colors.loss }]}>{formatCurrency(aiResult.stop_loss)}</Text></View>
+                  </View>
+                  <Text style={styles.aiSummary}>{aiResult.summary}</Text>
+                  <Text style={styles.aiSectionTitle}>Key Reasons</Text>
+                  {(aiResult.key_reasons || []).map((r, i) => (
+                    <View key={i} style={styles.reasonRow}><Ionicons name="checkmark-circle" size={16} color={colors.profit} /><Text style={styles.reasonText}>{r}</Text></View>
+                  ))}
+                  <Text style={styles.aiSectionTitle}>Risks</Text>
+                  {(aiResult.risks || []).map((r, i) => (
+                    <View key={i} style={styles.reasonRow}><Ionicons name="warning" size={16} color={colors.warning} /><Text style={styles.reasonText}>{r}</Text></View>
+                  ))}
+                </View>
+              )}
+            </View>
+          </>
         )}
 
-        {/* Technical Indicators */}
-        {technicals && (
-          <View style={styles.techCard}>
-            <Text style={styles.cardTitle}>Technical Indicators</Text>
-            
-            {/* RSI */}
-            <View style={styles.techRow}>
-              <View style={styles.techLabel}>
-                <Text style={styles.techName}>RSI (14)</Text>
-                <Text style={styles.techValue}>{technicals.rsi}</Text>
-              </View>
-              <View style={[styles.techSignal, {
-                backgroundColor: technicals.rsi_signal === 'Overbought' ? 'rgba(239,68,68,0.12)' : technicals.rsi_signal === 'Oversold' ? 'rgba(16,185,129,0.12)' : 'rgba(113,113,122,0.12)'
-              }]}>
-                <Text style={[styles.techSignalText, {
-                  color: technicals.rsi_signal === 'Overbought' ? colors.loss : technicals.rsi_signal === 'Oversold' ? colors.profit : colors.neutral
-                }]}>{technicals.rsi_signal}</Text>
-              </View>
-            </View>
-
-            {/* MACD */}
-            <View style={styles.techRow}>
-              <View style={styles.techLabel}>
-                <Text style={styles.techName}>MACD</Text>
-                <Text style={styles.techValue}>H: {technicals.macd.histogram}</Text>
-              </View>
-              <View style={[styles.techSignal, {
-                backgroundColor: technicals.macd.signal === 'Bullish' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'
-              }]}>
-                <Text style={[styles.techSignalText, {
-                  color: technicals.macd.signal === 'Bullish' ? colors.profit : colors.loss
-                }]}>{technicals.macd.signal}</Text>
-              </View>
-            </View>
-
-            {/* Moving Averages */}
-            <View style={styles.techRow}>
-              <View style={styles.techLabel}>
-                <Text style={styles.techName}>SMA 20</Text>
-                <Text style={styles.techValue}>{formatCurrency(technicals.moving_averages.sma20)}</Text>
-              </View>
-              <View style={[styles.techSignal, {
-                backgroundColor: technicals.price_vs_sma20 === 'Above' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'
-              }]}>
-                <Text style={[styles.techSignalText, {
-                  color: technicals.price_vs_sma20 === 'Above' ? colors.profit : colors.loss
-                }]}>Price {technicals.price_vs_sma20}</Text>
-              </View>
-            </View>
-
-            {technicals.moving_averages.sma50 && (
-              <View style={styles.techRow}>
-                <View style={styles.techLabel}>
-                  <Text style={styles.techName}>SMA 50</Text>
-                  <Text style={styles.techValue}>{formatCurrency(technicals.moving_averages.sma50)}</Text>
+        {/* --- FUNDAMENTALS TAB --- */}
+        {activeTab === 'fundamentals' && fundamentals && (
+          <View>
+            {[
+              {
+                label: 'Valuation', data: [
+                  { k: 'PE Ratio', v: fundamentals.valuation?.pe_ratio },
+                  { k: 'Forward PE', v: fundamentals.valuation?.forward_pe },
+                  { k: 'PB Ratio', v: fundamentals.valuation?.pb_ratio },
+                  { k: 'EV/EBITDA', v: fundamentals.valuation?.ev_ebitda },
+                ]
+              },
+              {
+                label: 'Profitability', data: [
+                  { k: 'ROE', v: fundamentals.profitability?.roe != null ? `${fundamentals.profitability.roe}%` : null },
+                  { k: 'ROA', v: fundamentals.profitability?.roa != null ? `${fundamentals.profitability.roa}%` : null },
+                  { k: 'Net Margin', v: fundamentals.profitability?.profit_margin != null ? `${fundamentals.profitability.profit_margin}%` : null },
+                  { k: 'Gross Margin', v: fundamentals.profitability?.gross_margin != null ? `${fundamentals.profitability.gross_margin}%` : null },
+                ]
+              },
+              {
+                label: 'Growth', data: [
+                  { k: 'Revenue Growth', v: fundamentals.growth?.revenue_growth != null ? `${fundamentals.growth.revenue_growth}%` : null },
+                  { k: 'Earnings Growth', v: fundamentals.growth?.earnings_growth != null ? `${fundamentals.growth.earnings_growth}%` : null },
+                  { k: 'EPS (TTM)', v: fundamentals.growth?.eps },
+                  { k: 'Forward EPS', v: fundamentals.growth?.forward_eps },
+                ]
+              },
+              {
+                label: 'Financial Health', data: [
+                  { k: 'Debt/Equity', v: fundamentals.financial_health?.debt_to_equity },
+                  { k: 'Current Ratio', v: fundamentals.financial_health?.current_ratio },
+                  { k: 'Free Cash Flow', v: formatLargeNumber(fundamentals.financial_health?.free_cash_flow) },
+                ]
+              },
+              {
+                label: 'Dividends', data: [
+                  { k: 'Dividend Yield', v: fundamentals.dividends?.dividend_yield != null ? `${fundamentals.dividends.dividend_yield}%` : null },
+                  { k: 'Payout Ratio', v: fundamentals.dividends?.payout_ratio != null ? `${fundamentals.dividends.payout_ratio}%` : null },
+                ]
+              },
+            ].map(section => (
+              <View key={section.label} style={styles.fundCard}>
+                <Text style={styles.cardTitle}>{section.label}</Text>
+                <View style={styles.statsGrid}>
+                  {section.data.map(item => item.v != null && (
+                    <StatItem key={item.k} label={item.k} value={String(item.v)} />
+                  ))}
                 </View>
               </View>
-            )}
-
-            {technicals.moving_averages.sma200 && (
-              <View style={styles.techRow}>
-                <View style={styles.techLabel}>
-                  <Text style={styles.techName}>SMA 200</Text>
-                  <Text style={styles.techValue}>{formatCurrency(technicals.moving_averages.sma200)}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Bollinger Bands */}
-            <View style={styles.techRow}>
-              <View style={styles.techLabel}>
-                <Text style={styles.techName}>Bollinger Bands</Text>
-                <Text style={styles.techValue}>
-                  {formatCurrency(technicals.bollinger_bands.lower)} - {formatCurrency(technicals.bollinger_bands.upper)}
-                </Text>
-              </View>
-              <View style={[styles.techSignal, {
-                backgroundColor: technicals.bollinger_bands.signal === 'Overbought' ? 'rgba(239,68,68,0.12)' : technicals.bollinger_bands.signal === 'Oversold' ? 'rgba(16,185,129,0.12)' : 'rgba(113,113,122,0.12)'
-              }]}>
-                <Text style={[styles.techSignalText, {
-                  color: technicals.bollinger_bands.signal === 'Overbought' ? colors.loss : technicals.bollinger_bands.signal === 'Oversold' ? colors.profit : colors.neutral
-                }]}>{technicals.bollinger_bands.signal}</Text>
-              </View>
-            </View>
+            ))}
           </View>
         )}
+        {activeTab === 'fundamentals' && !fundamentals && (
+          <View style={styles.emptyTab}><ActivityIndicator color={colors.primary} /><Text style={styles.emptyTabText}>Loading fundamentals...</Text></View>
+        )}
 
-        {/* AI Analysis Section */}
-        <View style={styles.aiCard}>
-          <View style={styles.aiHeader}>
-            <View style={styles.aiTitleRow}>
-              <Ionicons name="sparkles" size={20} color={colors.aiGlow} />
-              <Text style={styles.aiTitle}>AI Analysis</Text>
-            </View>
-            <Text style={styles.aiSubtitle}>Powered by GPT-5.2</Text>
-          </View>
-
-          <View style={styles.aiTimeframeRow}>
-            <TouchableOpacity
-              style={[styles.tfBtn, aiTimeframe === 'short' && styles.tfBtnActive]}
-              onPress={() => setAiTimeframe('short')}
-              testID="ai-timeframe-short"
-            >
-              <Text style={[styles.tfBtnText, aiTimeframe === 'short' && styles.tfBtnTextActive]}>Short Term</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tfBtn, aiTimeframe === 'long' && styles.tfBtnActive]}
-              onPress={() => setAiTimeframe('long')}
-              testID="ai-timeframe-long"
-            >
-              <Text style={[styles.tfBtnText, aiTimeframe === 'long' && styles.tfBtnTextActive]}>Long Term</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={styles.analyzeBtn}
-            onPress={runAI}
-            disabled={aiLoading}
-            testID="run-ai-analysis-btn"
-            activeOpacity={0.8}
-          >
-            {aiLoading ? (
-              <View style={styles.aiLoadingRow}>
-                <ActivityIndicator color="#FFF" size="small" />
-                <Text style={styles.analyzeBtnText}>Analyzing with AI...</Text>
-              </View>
+        {/* --- NEWS TAB --- */}
+        {activeTab === 'news' && (
+          <View>
+            {stockNews.length === 0 ? (
+              <View style={styles.emptyTab}><Ionicons name="newspaper-outline" size={36} color={colors.textMuted} /><Text style={styles.emptyTabText}>No news found</Text></View>
             ) : (
-              <View style={styles.aiLoadingRow}>
-                <Ionicons name="sparkles" size={18} color="#FFF" />
-                <Text style={styles.analyzeBtnText}>Get AI Prediction</Text>
+              stockNews.map((article, i) => <NewsCard key={i} article={article} />)
+            )}
+          </View>
+        )}
+
+        {/* --- F&O TAB --- */}
+        {activeTab === 'fno' && (
+          <View style={styles.fundCard}>
+            <Text style={styles.cardTitle}>Options Chain</Text>
+            {optionChain ? (
+              <OptionChainTable
+                symbol={decodedSymbol}
+                chain={optionChain.chain || []}
+                underlying_price={optionChain.underlying_price || 0}
+                max_pain={optionChain.max_pain}
+                oi_analysis={optionChain.oi_analysis}
+                expiry_dates={optionChain.expiry_dates || []}
+                selected_expiry={selectedExpiry}
+                onSelectExpiry={(exp) => {
+                  setSelectedExpiry(exp);
+                  api.getOptionChain(decodedSymbol, exp)
+                    .then(res => setOptionChain(res)).catch(() => { });
+                }}
+                loading={false}
+              />
+            ) : (
+              <View style={styles.emptyTab}>
+                <ActivityIndicator color={colors.primary} />
+                <Text style={styles.emptyTabText}>Loading option chain...</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </View>
+        )}
 
-          {/* AI Result */}
-          {aiResult && (
-            <View style={styles.aiResult}>
-              {/* Recommendation */}
-              <View style={[styles.recBadge, { backgroundColor: recColor + '18', borderColor: recColor + '40' }]}>
-                <Ionicons
-                  name={aiResult.recommendation === 'BUY' ? 'arrow-up-circle' : aiResult.recommendation === 'SELL' ? 'arrow-down-circle' : 'pause-circle'}
-                  size={28}
-                  color={recColor}
-                />
-                <View style={{ marginLeft: 12 }}>
-                  <Text style={[styles.recText, { color: recColor }]}>{aiResult.recommendation}</Text>
-                  <Text style={styles.recConfidence}>Confidence: {aiResult.confidence}%</Text>
-                </View>
-                <View style={[styles.sentimentBadge, {
-                  backgroundColor: aiResult.sentiment === 'Bullish' ? 'rgba(16,185,129,0.12)' : aiResult.sentiment === 'Bearish' ? 'rgba(239,68,68,0.12)' : 'rgba(113,113,122,0.12)'
-                }]}>
-                  <Text style={[styles.sentimentText, {
-                    color: aiResult.sentiment === 'Bullish' ? colors.profit : aiResult.sentiment === 'Bearish' ? colors.loss : colors.neutral
-                  }]}>{aiResult.sentiment}</Text>
-                </View>
-              </View>
-
-              {/* Target & Stop Loss */}
-              <View style={styles.targetRow}>
-                <View style={styles.targetCol}>
-                  <Text style={styles.targetLabel}>Target Price</Text>
-                  <Text style={[styles.targetValue, { color: colors.profit }]}>{formatCurrency(aiResult.target_price)}</Text>
-                </View>
-                <View style={styles.targetCol}>
-                  <Text style={styles.targetLabel}>Stop Loss</Text>
-                  <Text style={[styles.targetValue, { color: colors.loss }]}>{formatCurrency(aiResult.stop_loss)}</Text>
-                </View>
-              </View>
-
-              {/* Summary */}
-              <Text style={styles.aiSummary}>{aiResult.summary}</Text>
-
-              {/* Key Reasons */}
-              <Text style={styles.aiSectionTitle}>Key Reasons</Text>
-              {(aiResult.key_reasons || []).map((r, i) => (
-                <View key={i} style={styles.reasonRow}>
-                  <Ionicons name="checkmark-circle" size={16} color={colors.profit} />
-                  <Text style={styles.reasonText}>{r}</Text>
-                </View>
-              ))}
-
-              {/* Risks */}
-              <Text style={styles.aiSectionTitle}>Risks</Text>
-              {(aiResult.risks || []).map((r, i) => (
-                <View key={i} style={styles.reasonRow}>
-                  <Ionicons name="warning" size={16} color={colors.warning} />
-                  <Text style={styles.reasonText}>{r}</Text>
-                </View>
-              ))}
-
-              {/* Technical Outlook */}
-              <View style={styles.techOutlook}>
-                <Text style={styles.techOutlookLabel}>Technical Outlook</Text>
-                <Text style={styles.techOutlookText}>{aiResult.technical_outlook}</Text>
-              </View>
-
-              <View style={styles.disclaimer}>
-                <Ionicons name="information-circle" size={14} color={colors.textMuted} />
-                <Text style={styles.disclaimerText}>
-                  AI predictions are for informational purposes only. Not financial advice. Always do your own research.
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
+        <SEBIDisclaimerBanner />
       </ScrollView>
     </SafeAreaView>
   );
@@ -610,4 +578,12 @@ const styles = StyleSheet.create({
   periodHLItem: { width: '30%', backgroundColor: 'rgba(39,39,42,0.3)', borderRadius: 10, padding: 10 },
   periodHLLabel: { color: colors.textMuted, fontSize: 11 },
   periodHLValue: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'], marginTop: 3 },
+  fundCard: { backgroundColor: colors.card, borderRadius: 20, padding: 20, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(39,39,42,0.5)' },
+  emptyTab: { alignItems: 'center', paddingVertical: 40 },
+  emptyTabText: { color: colors.textMuted, marginTop: 12, fontSize: 14 },
+  tabRow: { marginBottom: 16 },
+  tab: { paddingHorizontal: 16, paddingVertical: 8, marginRight: 8, borderRadius: 20, backgroundColor: 'rgba(39,39,42,0.4)', borderWidth: 1, borderColor: 'transparent' },
+  tabActive: { backgroundColor: 'rgba(124,58,237,0.12)', borderColor: 'rgba(124,58,237,0.4)' },
+  tabText: { color: colors.textMuted, fontSize: 13, fontWeight: '600' },
+  tabTextActive: { color: colors.accent, fontWeight: '700' },
 });

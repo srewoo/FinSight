@@ -34,5 +34,25 @@ stop_pid_file() {
 stop_pid_file "Backend"  "$LOG_DIR/backend.pid"  8001
 stop_pid_file "Frontend" "$LOG_DIR/frontend.pid" 8082
 
+# ── Clear logs ──────────────────────────────────────────────────────────────
+rm -f "$LOG_DIR/backend.log" "$LOG_DIR/frontend.log"
+
+# ── Clear all project caches ─────────────────────────────────────────────────
+FRONTEND="$ROOT/frontend"
+BACKEND="$ROOT/backend"
+
+# Metro bundler cache
+rm -rf "$FRONTEND/.metro-cache" \
+        "$FRONTEND/node_modules/.cache"
+
+# Expo dev cache
+rm -rf "$FRONTEND/.expo"
+
+# Python bytecode cache (backend)
+find "$BACKEND" -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+find "$BACKEND" -name '*.pyc' -delete 2>/dev/null || true
+
+echo "  ✓ Caches cleared (Metro, Expo, Python __pycache__)"
+
 echo ""
 echo "  All services stopped."

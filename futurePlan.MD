@@ -10,7 +10,6 @@ Great question! Here are high-impact features that would elevate TradeMind AI fr
 
 3. **Sector Heatmap** — Visual grid showing which sectors (IT, Banking, Pharma, Auto, FMCG, Metals) are hot/cold based on aggregate price movement. Helps identify sector rotation.
 
-4. **Options Chain & Open Interest Analysis** — OI data reveals where big money is positioned. Put-Call ratio, max pain level, unusual OI buildup — these are strong directional signals.
 
 5. **Fibonacci Retracement Levels** — Auto-calculate Fib levels on price charts. Traders heavily rely on 38.2%, 50%, 61.8% levels for entries/exits.
 
@@ -48,21 +47,11 @@ Great question! Here are high-impact features that would elevate TradeMind AI fr
 
 16. **Breakout Scanner** — Real-time scan for stocks breaking above resistance or below support with volume confirmation.
 
----
 
-### **Social & Community**
 
-17. **Paper Trading Mode** — Virtual ₹10L portfolio to practice without real money. Track virtual P&L.
+20. Indian retail investors care deeply about P/E, P/B, ROE, ROCE, Debt/Equity, dividend yield, promoter holding, and quarterly results. Screener.in and Tickertape dominate here. 
 
-18. **AI Trade Journal** — Log your trades, AI analyzes your patterns: "You tend to exit winners too early" or "Your best trades are in pharma sector."
+ 8. No Alerts / Push Notifications
+  Traders need price alerts, technical breakout alerts, and earnings reminders. Without push notifications, users have no reason to keep the app installed. They'll check it once and forget.
 
-19. **Screener with Custom Filters** — "Show me stocks with RSI < 30, Market Cap > 10,000 Cr, PE < 15, and bullish MACD crossover."
 
----
-
-### **Highest ROI picks** (if I had to prioritize 3):
-- **Screener with Custom Filters** — most requested by serious traders
-- **AI Daily Morning Brief** — creates daily engagement/retention
-- **Price & Technical Alerts** — makes the app indispensable (users keep it installed for alerts)
-
-Want me to implement any of these?
