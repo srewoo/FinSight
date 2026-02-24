@@ -2,7 +2,7 @@ yarn run v1.22.22
 $ expo start --port 8082
 env: load .env
 env: export EXPO_TUNNEL_SUBDOMAIN EXPO_PACKAGER_HOSTNAME EXPO_PUBLIC_BACKEND_URL EXPO_USE_FAST_RESOLVER METRO_CACHE_ROOT EXPO_PUBLIC_FIREBASE_API_KEY EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN EXPO_PUBLIC_FIREBASE_PROJECT_ID EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID EXPO_PUBLIC_FIREBASE_APP_ID
-Starting project at /Users/sharajrewoo/DemoReposQA/Neural/frontend
+Starting project at /Users/sharajrewoo/DemoReposQA/FinSight/frontend
 Fast resolver is enabled.
 Starting Metro Bundler
 The following packages should be updated for best compatibility with the installed expo version:
@@ -12,20 +12,27 @@ Your project may not work correctly until you install the expected versions of t
 Waiting on http://localhost:8082
 Logs for your project will appear below.
 Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.5% (417/587)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 64.4% (464/578)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ node_modules/expo-router/node/render.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ Bundled 6408ms node_modules/expo-router/node/render.js (915 modules)
-λ Bundled 3075ms node_modules/expo-router/node/render.js (1 module)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 44.6% (362/542)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 64.3% (466/581)
+λ Bundled 6554ms node_modules/expo-router/node/render.js (918 modules)
 "shadow*" style props are deprecated. Use "boxShadow".
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 95.2% (930/955)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-"shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 7747ms node_modules/expo-router/entry.js (955 modules)
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 96.9% (943/958)
+Web Bundled 7357ms node_modules/expo-router/entry.js (958 modules)
 Error: Premature close
     at onclose (node:internal/streams/end-of-stream:159:30)
     at processTicksAndRejections (node:internal/process/task_queues:77:11)
-Web Bundled 4368ms node_modules/expo-router/entry.js (1 module)
-Web Bundled 3219ms node_modules/expo-router/entry.js (962 modules)
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 23ms node_modules/expo-router/node/render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+Web Bundled 694ms node_modules/expo-router/entry.js (1 module)
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 71ms node_modules/expo-router/node/render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+Web Bundled 842ms node_modules/expo-router/entry.js (1 module)
+λ Bundled 27ms node_modules/expo-router/node/render.js (1 module)
+"shadow*" style props are deprecated. Use "boxShadow".
+Web Bundled 419ms node_modules/expo-router/entry.js (1 module)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 61.2% (567/725)
+Web Bundled 3524ms node_modules/expo-router/entry.js (965 modules)
  LOG  [web] Logs will appear in the browser console

@@ -1,19 +1,191 @@
-INFO:     Will watch for changes in these directories: ['/Users/sharajrewoo/DemoReposQA/Neural/backend']
+INFO:     Will watch for changes in these directories: ['/Users/sharajrewoo/DemoReposQA/FinSight/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [14696] using StatReload
-/Users/sharajrewoo/DemoReposQA/Neural/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+INFO:     Started reloader process [86917] using StatReload
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
   warnings.warn(
-INFO:     Started server process [14701]
+INFO:     Started server process [86922]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:50391 - "GET /api/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50560 - "OPTIONS /api/broker/status HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50560 - "OPTIONS /api/market/indices HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50562 - "OPTIONS /api/market/top-movers HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50562 - "OPTIONS /api/market/news?limit=10 HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50560 - "OPTIONS /api/market/sector-heatmap HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50664 - "OPTIONS /api/ai/auto-recommendations HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50664 - "OPTIONS /api/market/breakouts HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50676 - "OPTIONS /api/user/accept-disclaimer HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50713 - "OPTIONS /api/settings HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:50715 - "OPTIONS /api/user/quota HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:59194 - "GET /api/ HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 59206) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59208) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59234 - "OPTIONS /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59235 - "OPTIONS /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59235 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59234 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59255 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59257 - "POST /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59257 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [86922]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [88651]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     ('127.0.0.1', 59346) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59349) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+WARNING:  StatReload detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [88651]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [88727]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     ('127.0.0.1', 59354) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59356) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59394 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59395 - "POST /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59395 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59412 - "OPTIONS /api/stocks/POWERGRID.NS/quote HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59414 - "OPTIONS /api/stocks/POWERGRID.NS/technicals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59417 - "OPTIONS /api/watchlist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59418 - "OPTIONS /api/stocks/POWERGRID.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59418 - "GET /api/stocks/POWERGRID.NS/quote HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59417 - "GET /api/stocks/POWERGRID.NS/technicals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59412 - "GET /api/stocks/POWERGRID.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59414 - "GET /api/watchlist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59414 - "OPTIONS /api/stocks/POWERGRID.NS/fundamentals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59412 - "OPTIONS /api/stocks/POWERGRID.NS/news?limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59417 - "OPTIONS /api/options/POWERGRID.NS/chain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59417 - "GET /api/stocks/POWERGRID.NS/news?limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59414 - "GET /api/stocks/POWERGRID.NS/fundamentals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59412 - "GET /api/options/POWERGRID.NS/chain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59417 - "OPTIONS /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 200 OK
+2026-02-24 12:03:26,764 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 403 Forbidden"
+2026-02-24 12:03:26,765 - llm_client - ERROR - OpenAI call failed: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+2026-02-24 12:03:26,765 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+INFO:     127.0.0.1:59417 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
+2026-02-24 12:03:41,528 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 403 Forbidden"
+2026-02-24 12:03:41,528 - llm_client - ERROR - OpenAI call failed: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+2026-02-24 12:03:41,528 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+INFO:     127.0.0.1:59473 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
+WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [88727]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [92668]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     ('127.0.0.1', 60516) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 60524) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+WARNING:  StatReload detected changes in 'tests/test_llm_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [92668]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [92819]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     ('127.0.0.1', 60585) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 60587) - "WebSocket /ws/prices" [accepted]
+INFO:     connWARNING:  StatReload detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [92819]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [92966]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     ('127.0.0.1', 60635) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 60638) - "WebSocket /ws/prices" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     connection closed
+INFO:     127.0.0.1:60721 - "OPTIONS /api/broker/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60712 - "GET /api/stocks/POWERGRID.NS/quote HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60714 - "GET /api/stocks/POWERGRID.NS/technicals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60718 - "GET /api/stocks/POWERGRID.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60717 - "GET /api/watchlist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60721 - "GET /api/broker/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60721 - "GET /api/stocks/POWERGRID.NS/fundamentals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60717 - "GET /api/stocks/POWERGRID.NS/news?limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60718 - "GET /api/options/POWERGRID.NS/chain HTTP/1.1" 200 OK
+2026-02-24 12:07:48,978 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2026-02-24 12:07:48,979 - llm_client - ERROR - OpenAI call failed: Error code: 400 - {'error': {'message': "Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}
+2026-02-24 12:07:48,979 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 400 - {'error': {'message': "Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}
+INFO:     127.0.0.1:60718 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
+WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [92966]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [94374]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [94374]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [94512]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+2026-02-24 12:09:36,163 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 403 Forbidden"
+2026-02-24 12:09:36,165 - llm_client - ERROR - OpenAI call failed: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5.2`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+2026-02-24 12:09:36,165 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5.2`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+INFO:     127.0.0.1:60886 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
+WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [94512]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [95583]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:61403 - "OPTIONS /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 200 OK
+2026-02-24 12:14:13,633 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2026-02-24 12:14:13,635 - llm_client - ERROR - OpenAI call failed: Error code: 400 - {'error': {'message': "Unsupported value: 'temperature' does not support 0.2 with this model. Only the default (1) value is supported.", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsupported_value'}}
+2026-02-24 12:14:13,635 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 400 - {'error': {'message': "Unsupported value: 'temperature' does not support 0.2 with this model. Only the default (1) value is supported.", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsupported_value'}}
+INFO:     127.0.0.1:61403 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
+WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [95583]
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [99114]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+2026-02-24 12:24:17,254 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:62042 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 200 OK

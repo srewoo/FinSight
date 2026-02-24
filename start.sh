@@ -12,6 +12,24 @@ echo "╔═══════════════════════�
 echo "║     FinSight — Starting Up       ║"
 echo "╚══════════════════════════════════════╝"
 
+# ── MongoDB ───────────────────────────────────
+echo ""
+echo "▶ Checking MongoDB..."
+if ! mongosh --eval "db.adminCommand('ping')" --quiet > /dev/null 2>&1; then
+  echo "  MongoDB not running — starting it..."
+  MONGO_DATA="/tmp/finsight-mongodb-data"
+  MONGO_LOG="/tmp/finsight-mongodb.log"
+  mkdir -p "$MONGO_DATA"
+  if mongod --dbpath "$MONGO_DATA" --logpath "$MONGO_LOG" --port 27017 --fork > /dev/null 2>&1; then
+    echo "  ✓ MongoDB started (data: $MONGO_DATA)"
+  else
+    echo "  ⚠  Could not start MongoDB automatically."
+    echo "     Please start MongoDB manually: mongod --dbpath /tmp/finsight-mongodb-data"
+  fi
+else
+  echo "  ✓ MongoDB already running"
+fi
+
 # ── Backend ──────────────────────────────────
 echo ""
 echo "▶ Starting backend (FastAPI on port 8001)..."
@@ -22,19 +40,21 @@ fi
 
 cd "$BACKEND"
 
-# Create venv if needed
-if [ ! -d ".venv" ]; then
-  echo "  Creating Python virtual environment..."
+# Create or repair venv if needed
+VENV_PYTHON=".venv/bin/python3"
+if [ ! -d ".venv" ] || [ ! -f "$VENV_PYTHON" ] || ! "$VENV_PYTHON" -c "import sys; sys.exit(0)" 2>/dev/null; then
+  echo "  Creating/repairing Python virtual environment..."
+  rm -rf .venv
   python3 -m venv .venv
 fi
 
 source .venv/bin/activate
-pip install -q -r requirements.txt
+.venv/bin/pip install -q -r requirements.txt
 
 # Kill any process on port 8001
 lsof -ti :8001 | xargs kill -9 2>/dev/null || true
 
-nohup uvicorn server:app --host 0.0.0.0 --port 8001 --reload \
+nohup .venv/bin/uvicorn server:app --host 0.0.0.0 --port 8001 --reload \
   > "$LOG_DIR/backend.log" 2>&1 &
 BACKEND_PID=$!
 echo "  ✓ Backend started (PID $BACKEND_PID) → log: .logs/backend.log"

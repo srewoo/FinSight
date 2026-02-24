@@ -24,7 +24,7 @@ class TestSupportedModels:
         assert "claude" in SUPPORTED_MODELS
 
     def test_openai_has_gpt52(self):
-        assert "gpt-5.2" in SUPPORTED_MODELS["openai"]
+        assert "gpt-5-mini" in SUPPORTED_MODELS["openai"]
 
     def test_gemini_has_gemini30(self):
         assert "gemini-3.0" in SUPPORTED_MODELS["gemini"]
@@ -49,17 +49,17 @@ class TestCallLLMValidation:
     @pytest.mark.asyncio
     async def test_raises_valueerror_for_empty_api_key(self):
         with pytest.raises(ValueError, match="No API key"):
-            await call_llm(provider="openai", model="gpt-5.2", api_key="", prompt="test")
+            await call_llm(provider="openai", model="gpt-5-mini", api_key="", prompt="test")
 
     @pytest.mark.asyncio
     async def test_raises_valueerror_for_none_api_key(self):
         with pytest.raises(ValueError, match="No API key"):
-            await call_llm(provider="openai", model="gpt-5.2", api_key=None, prompt="test")
+            await call_llm(provider="openai", model="gpt-5-mini", api_key=None, prompt="test")
 
     @pytest.mark.asyncio
     async def test_raises_valueerror_for_unknown_provider(self):
         with pytest.raises(ValueError, match="Unknown provider"):
-            await call_llm(provider="fakeprovider", model="gpt-5.2", api_key="sk-test", prompt="test")
+            await call_llm(provider="fakeprovider", model="gpt-5-mini", api_key="sk-test", prompt="test")
 
     @pytest.mark.asyncio
     async def test_raises_valueerror_for_unknown_model(self):
@@ -77,7 +77,7 @@ class TestCallLLMValidation:
         """Provider 'OpenAI' should be normalized to 'openai'."""
         with patch.object(llm_client, '_call_openai', new_callable=AsyncMock) as mock_openai:
             mock_openai.return_value = '{"status": "ok"}'
-            result = await call_llm(provider="OPENAI", model="gpt-5.2", api_key="sk-test", prompt="hello")
+            result = await call_llm(provider="OPENAI", model="gpt-5-mini", api_key="sk-test", prompt="hello")
             mock_openai.assert_called_once()
             assert result == '{"status": "ok"}'
 
@@ -90,7 +90,7 @@ class TestOpenAIDispatch:
         with patch.object(llm_client, '_call_openai', new_callable=AsyncMock) as mock_fn:
             mock_fn.return_value = '{"recommendation": "BUY"}'
             result = await call_llm(
-                provider="openai", model="gpt-5.2", api_key="sk-test", prompt="Analyze RELIANCE"
+                provider="openai", model="gpt-5-mini", api_key="sk-test", prompt="Analyze RELIANCE"
             )
             mock_fn.assert_called_once()
             assert result == '{"recommendation": "BUY"}'
@@ -100,7 +100,7 @@ class TestOpenAIDispatch:
         with patch.object(llm_client, '_call_openai', new_callable=AsyncMock) as mock_fn:
             mock_fn.return_value = '{"prediction": "UP"}'
             await call_llm(
-                provider="openai", model="gpt-5.2", api_key="sk-test",
+                provider="openai", model="gpt-5-mini", api_key="sk-test",
                 prompt="Analyze chart", image_b64="base64data"
             )
             call_args = mock_fn.call_args
@@ -154,7 +154,7 @@ class TestRuntimeErrors:
         with patch.object(llm_client, '_call_openai', new_callable=AsyncMock) as mock_fn:
             mock_fn.side_effect = RuntimeError("OpenAI API returned 401 Unauthorized")
             with pytest.raises(RuntimeError, match="OpenAI"):
-                await call_llm(provider="openai", model="gpt-5.2", api_key="bad-key", prompt="test")
+                await call_llm(provider="openai", model="gpt-5-mini", api_key="bad-key", prompt="test")
 
     @pytest.mark.asyncio
     async def test_gemini_runtime_error_propagated(self):

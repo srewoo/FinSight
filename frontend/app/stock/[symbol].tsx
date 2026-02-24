@@ -116,9 +116,16 @@ export default function StockDetailScreen() {
     try {
       const data = await api.getAIAnalysis(decodedSymbol, aiTimeframe);
       setAiResult(data.analysis);
-    } catch (e) {
-      console.error('AI error:', e);
-      Alert.alert('Error', 'Failed to get AI analysis. Please try again.');
+    } catch (e: any) {
+      const msg: string = e?.message ?? 'Failed to get AI analysis.';
+      const isNoKey = msg.toLowerCase().includes('api key') || msg.toLowerCase().includes('no ai');
+      Alert.alert(
+        isNoKey ? 'API Key Required' : 'AI Analysis Failed',
+        isNoKey
+          ? 'No AI API key is configured. Go to Settings → add your OpenAI, Gemini, or Claude key → Save Settings.'
+          : msg,
+        isNoKey ? [{ text: 'Go to Settings', onPress: () => router.push('/(tabs)/settings') }, { text: 'Cancel', style: 'cancel' }] : undefined,
+      );
     } finally {
       setAiLoading(false);
     }

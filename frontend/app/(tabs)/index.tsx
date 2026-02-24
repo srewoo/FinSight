@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,8 @@ import { api } from '../../src/api';
 import { colors, formatCurrency } from '../../src/theme';
 import SectorHeatmap from '../../src/components/SectorHeatmap';
 import NewsCard from '../../src/components/NewsCard';
+import { wsManager } from '../../src/websocket';
+import { useMarketStatus } from '../../src/hooks/useMarketStatus';
 
 interface IndexData {
   symbol: string; name: string; price: number; change: number; change_percent: number;
@@ -16,6 +18,22 @@ interface IndexData {
 interface StockMover {
   symbol: string; name: string; price: number; change: number; change_percent: number;
 }
+
+const MARKET_STATUS_COLORS: Record<string, string> = {
+  open: colors.profit,
+  'pre-market': '#F59E0B',
+  closed: colors.loss,
+  weekend: colors.textMuted,
+  unknown: colors.textMuted,
+};
+
+const MARKET_STATUS_LABELS: Record<string, string> = {
+  open: 'Market Open',
+  'pre-market': 'Pre-Market',
+  closed: 'Market Closed',
+  weekend: 'Weekend',
+  unknown: 'Live',
+};
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -27,6 +45,52 @@ export default function HomeScreen() {
   const [sectorBreadth, setSectorBreadth] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
+  const indicesRef = useRef<IndexData[]>([]);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  const marketStatus = useMarketStatus();
+  const statusColor = MARKET_STATUS_COLORS[marketStatus] ?? colors.textMuted;
+  const statusLabel = MARKET_STATUS_LABELS[marketStatus] ?? 'Live';
+
+  // Pulsing dot animation for live indicator
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 0.3, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+      ])
+    );
+    if (wsConnected && marketStatus === 'open') pulse.start();
+    else pulse.stop();
+    return () => pulse.stop();
+  }, [wsConnected, marketStatus, pulseAnim]);
+
+  // WebSocket: connect and subscribe to index symbols for live price updates
+  useEffect(() => {
+    wsManager.connect();
+    const indexSymbols = ['^NSEI', '^BSESN'];
+    wsManager.subscribe(indexSymbols);
+
+    const prevPriceHandler = wsManager.onPriceUpdate;
+    wsManager.onPriceUpdate = (sym, update) => {
+      if (prevPriceHandler) prevPriceHandler(sym, update);
+      setWsConnected(true);
+      setIndices(prev => {
+        const next = prev.map(idx =>
+          idx.symbol === sym
+            ? { ...idx, price: update.price, change: update.change }
+            : idx
+        );
+        indicesRef.current = next;
+        return next;
+      });
+    };
+
+    return () => {
+      wsManager.unsubscribe(indexSymbols);
+    };
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -35,10 +99,11 @@ export default function HomeScreen() {
         api.getTopMovers(),
       ]);
       setIndices(idxRes.indices || []);
+      indicesRef.current = idxRes.indices || [];
       setGainers(moversRes.gainers || []);
       setLosers(moversRes.losers || []);
     } catch (e) {
-      console.error('Home fetch error:', e);
+      // silently handled
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -82,9 +147,15 @@ export default function HomeScreen() {
             <Text style={styles.appName} testID="app-title">FinSight</Text>
             <Text style={styles.subtitle}>Indian Market Intelligence</Text>
           </View>
-          <View style={styles.aiBadge}>
-            <Ionicons name="sparkles" size={14} color={colors.primary} />
-            <Text style={styles.aiBadgeText}>AI Powered</Text>
+          <View style={{ gap: 8, alignItems: 'flex-end' }}>
+            <View style={styles.aiBadge}>
+              <Ionicons name="sparkles" size={14} color={colors.primary} />
+              <Text style={styles.aiBadgeText}>AI Powered</Text>
+            </View>
+            <View style={[styles.marketStatusBadge, { borderColor: `${statusColor}40` }]}>
+              <Animated.View style={[styles.liveDot, { backgroundColor: statusColor, opacity: pulseAnim }]} />
+              <Text style={[styles.marketStatusText, { color: statusColor }]}>{statusLabel}</Text>
+            </View>
           </View>
         </View>
 
@@ -244,4 +315,6 @@ const styles = StyleSheet.create({
   liveBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.profit },
   liveText: { color: colors.textMuted, fontSize: 12 },
+  marketStatusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
+  marketStatusText: { fontSize: 11, fontWeight: '600' },
 });

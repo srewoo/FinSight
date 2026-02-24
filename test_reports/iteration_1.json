@@ -4,7 +4,7 @@
     "critical": [
       {
         "endpoint": "POST /api/ai/analyze-chart-image",
-        "issue": "Chart image analysis fails with 520 error. GPT-5.2 API rejects image/jpeg MIME type - expects 'application/pdf' format. Error: 'Invalid file data: messages[2].content[0].file.file_data. Expected a base64-encoded data URL with an application/pdf MIME type, but got unsupported MIME type image/jpeg'",
+        "issue": "Chart image analysis fails with 520 error. gpt-5-mini API rejects image/jpeg MIME type - expects 'application/pdf' format. Error: 'Invalid file data: messages[2].content[0].file.file_data. Expected a base64-encoded data URL with an application/pdf MIME type, but got unsupported MIME type image/jpeg'",
         "priority": "HIGH",
         "note": "Third-party integration issue with LLM image file handling"
       }
@@ -23,7 +23,7 @@
     "/tmp/new_features_test.log"
   ],
   "action_items": [
-    "Fix chart image analysis endpoint: Change FileContent MIME type from 'image/jpeg' to expected format or use different approach for GPT-5.2 image processing",
+    "Fix chart image analysis endpoint: Change FileContent MIME type from 'image/jpeg' to expected format or use different approach for gpt-5-mini image processing",
     "Consider using web_search to find correct LLM provider file upload format for images"
   ],
   "critical_code_review_comments": [
@@ -58,7 +58,7 @@
         "BSE stock technicals working"
       ],
       "failed": [
-        "POST /api/ai/analyze-chart-image - GPT-5.2 MIME type rejection"
+        "POST /api/ai/analyze-chart-image - gpt-5-mini MIME type rejection"
       ]
     },
     "frontend": {

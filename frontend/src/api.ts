@@ -4,26 +4,46 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const API_BASE = `${BACKEND_URL}/api`;
 const WS_BASE = (BACKEND_URL || '').replace(/^http/, 'ws');
 
-async function request(endpoint: string, options?: RequestInit) {
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 800;
+
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function request(endpoint: string, options?: RequestInit, retries = MAX_RETRIES): Promise<any> {
   const url = `${API_BASE}${endpoint}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options?.headers as Record<string, string> || {}),
   };
 
+  try {
+    const res = await fetch(url, { ...options, headers });
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || `Request failed: ${res.status}`);
+    if (!res.ok) {
+      const text = await res.text();
+      let message = text;
+      try {
+        const json = JSON.parse(text);
+        message = json?.detail || json?.message || text;
+      } catch { /* not JSON — use raw text */ }
+      const errMsg = message || `Request failed: ${res.status}`;
+      // Don't retry client or known business errors (4xx, 503 quota/config)
+      if (res.status >= 400 && res.status < 500) throw new Error(errMsg);
+      if (res.status === 503) throw new Error(errMsg);
+      throw new Error(errMsg);
+    }
+    return res.json();
+  } catch (err: any) {
+    const isNetworkError = err?.message === 'Network request failed' || err?.name === 'TypeError';
+    const isServerError = err?.message?.includes('Server error');
+    if (retries > 0 && (isNetworkError || isServerError)) {
+      await sleep(RETRY_DELAY_MS * (MAX_RETRIES - retries + 1));
+      return request(endpoint, options, retries - 1);
+    }
+    throw err;
   }
-  return res.json();
 }
 
 export const api = {
@@ -94,8 +114,11 @@ export const api = {
 
   // ── LLM Settings ─────────────────────────────────────────────────────────
   getSettings: () => request('/settings'),
-  saveSettings: (data: { preferred_provider: string }) =>
+  saveSettings: (data: { preferred_provider: string; preferred_model?: string }) =>
     request('/settings', { method: 'POST', body: JSON.stringify(data) }),
+  getApiKeys: () => request('/settings/api-keys'),
+  saveApiKeys: (data: { openai_key?: string; gemini_key?: string; claude_key?: string }) =>
+    request('/settings/api-keys', { method: 'POST', body: JSON.stringify(data) }),
 
   // ── User / Auth ───────────────────────────────────────────────────────────
   getUserProfile: () => request('/user/profile'),

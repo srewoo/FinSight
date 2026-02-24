@@ -2,7 +2,7 @@
    Stub get_current_user returns a fixed anonymous user so existing
    endpoint signatures don't need to change."""
 import logging
-from fastapi import Request
+from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 
@@ -20,11 +20,15 @@ class AuthenticatedUser:
 
 _ANON_USER = AuthenticatedUser()
 
-async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = None) -> AuthenticatedUser:
+async def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+) -> AuthenticatedUser:
     """Returns the anonymous stub user — no token verification performed."""
     return _ANON_USER
 
-async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = None) -> Optional[AuthenticatedUser]:
+async def get_optional_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+) -> Optional[AuthenticatedUser]:
     """Always returns the stub user."""
     return _ANON_USER
 

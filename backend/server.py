@@ -123,39 +123,94 @@ class ChartImageRequest(BaseModel):
 
 class UserPreferenceUpdate(BaseModel):
     preferred_provider: str
+    preferred_model: Optional[str] = None
+
+class ApiKeysUpdate(BaseModel):
+    openai_key: Optional[str] = None
+    gemini_key: Optional[str] = None
+    claude_key: Optional[str] = None
 
 class DisclaimerAcceptRequest(BaseModel):
     version: str = "1.0"
 
-# --- App-Provided LLM Configuration ---
-def get_llm_config(preferred_provider: str = None) -> Dict[str, str]:
-    """Get LLM configuration from environment variables."""
+# --- LLM Configuration (user keys take priority over env keys) ---
+def _mask_key(key: str) -> str:
+    """Return last 4 chars masked as ****xxxx, or empty string."""
+    if not key:
+        return ""
+    return f"****{key[-4:]}" if len(key) > 4 else "****"
+
+def _safe_decrypt(ciphertext: str) -> str:
+    """Decrypt a value using the server Fernet key; return empty string on failure."""
+    if not ciphertext:
+        return ""
+    try:
+        from cryptography.fernet import Fernet, InvalidToken
+        key = os.environ.get("FERNET_KEY", "")
+        if not key:
+            return ""
+        f = Fernet(key.encode() if isinstance(key, str) else key)
+        return f.decrypt(ciphertext.encode()).decode()
+    except Exception:
+        return ""
+
+def get_llm_config(preferred_provider: str = None, preferred_model: str = None, user_profile: Dict = None) -> Dict[str, str]:
+    """
+    Get LLM configuration. User-stored API keys take priority over server env keys.
+    Falls back to any available env key if the preferred provider has no key configured.
+    """
     provider = (preferred_provider or os.environ.get("DEFAULT_LLM_PROVIDER", "gemini")).lower().strip()
 
-    key_map = {
-        "openai": os.environ.get("OPENAI_API_KEY"),
-        "gemini": os.environ.get("GEMINI_API_KEY"),
-        "claude": os.environ.get("CLAUDE_API_KEY"),
+    # Resolve user-stored (encrypted) API keys
+    user_api_keys: Dict[str, str] = {}
+    if user_profile and user_profile.get("api_keys"):
+        stored = user_profile["api_keys"]
+        for p in ("openai", "gemini", "claude"):
+            enc = stored.get(f"{p}_enc", "")
+            if enc:
+                decrypted = _safe_decrypt(enc)
+                if decrypted:
+                    user_api_keys[p] = decrypted
+
+    # Build key resolution order: user key → env key
+    env_key_map = {
+        "openai": os.environ.get("OPENAI_API_KEY", ""),
+        "gemini": os.environ.get("GEMINI_API_KEY", ""),
+        "claude": os.environ.get("CLAUDE_API_KEY", ""),
     }
 
-    api_key = key_map.get(provider)
+    def resolve_key(p: str) -> str:
+        return user_api_keys.get(p) or env_key_map.get(p, "")
+
+    api_key = resolve_key(provider)
     if not api_key:
-        for p, k in key_map.items():
-            if k:
-                provider = p
-                api_key = k
-                break
+        # Try other providers in priority order
+        for p in ("gemini", "openai", "claude"):
+            if p != provider:
+                fallback = resolve_key(p)
+                if fallback:
+                    provider = p
+                    api_key = fallback
+                    break
 
     if not api_key:
-        raise HTTPException(status_code=503, detail="AI service not configured. Contact support.")
+        raise HTTPException(
+            status_code=503,
+            detail="No AI API key configured. Add your API key in Settings → API Keys."
+        )
 
-    model_map = {
-        "openai": os.environ.get("OPENAI_MODEL", "gpt-5.2"),
+    # Resolve model: user preference → env default → first supported model
+    env_model_map = {
+        "openai": os.environ.get("OPENAI_MODEL", "gpt-5-mini"),
         "gemini": os.environ.get("GEMINI_MODEL", "gemini-3.0"),
         "claude": os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6"),
     }
+    model = preferred_model or env_model_map.get(provider, SUPPORTED_MODELS[provider][0])
+    # Guard: ensure model belongs to resolved provider
+    if model not in SUPPORTED_MODELS.get(provider, []):
+        model = SUPPORTED_MODELS[provider][0]
 
-    return {"provider": provider, "model": model_map.get(provider, SUPPORTED_MODELS[provider][0]), "api_key": api_key}
+    return {"provider": provider, "model": model, "api_key": api_key}
 
 # --- AI Quota System ---
 async def check_and_increment_quota(user_id: str, feature: str = "ai_analysis") -> dict:
@@ -440,15 +495,25 @@ async def get_user_profile(user: AuthenticatedUser = Depends(get_current_user)):
     return existing
 
 # ---------------------------------------------------------------------------
-# Settings (Provider Preference — no API key management)
+# Settings — Provider/Model Preference + API Key Management
 # ---------------------------------------------------------------------------
 @api_router.get("/settings")
 async def get_settings(user: AuthenticatedUser = Depends(get_current_user)):
     user_profile = await db.users.find_one({"firebase_uid": user.uid})
+    preferred_provider = user_profile.get("preferred_provider", "gemini") if user_profile else "gemini"
+    preferred_model = user_profile.get("preferred_model") if user_profile else None
+    # Check which providers have keys available (user or env)
+    stored = (user_profile or {}).get("api_keys", {})
+    def _has_key(p: str) -> bool:
+        enc = stored.get(f"{p}_enc", "")
+        user_key = _safe_decrypt(enc) if enc else ""
+        return bool(user_key or os.environ.get(f"{p.upper()}_API_KEY", ""))
     return {
-        "preferred_provider": user_profile.get("preferred_provider", "gemini") if user_profile else "gemini",
+        "preferred_provider": preferred_provider,
+        "preferred_model": preferred_model,
         "supported_models": SUPPORTED_MODELS,
-        "ai_available": bool(os.environ.get("OPENAI_API_KEY") or os.environ.get("GEMINI_API_KEY") or os.environ.get("CLAUDE_API_KEY")),
+        "ai_available": any(_has_key(p) for p in ("openai", "gemini", "claude")),
+        "provider_key_status": {p: _has_key(p) for p in ("openai", "gemini", "claude")},
     }
 
 @api_router.post("/settings")
@@ -456,11 +521,80 @@ async def save_settings(payload: UserPreferenceUpdate, user: AuthenticatedUser =
     provider = payload.preferred_provider.lower().strip()
     if provider not in SUPPORTED_MODELS:
         raise HTTPException(status_code=400, detail=f"Unknown provider '{provider}'")
+    update_fields: Dict[str, Any] = {
+        "preferred_provider": provider,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if payload.preferred_model is not None:
+        model = payload.preferred_model.strip()
+        if model not in SUPPORTED_MODELS.get(provider, []):
+            raise HTTPException(status_code=400, detail=f"Model '{model}' is not supported for provider '{provider}'")
+        update_fields["preferred_model"] = model
     await db.users.update_one(
         {"firebase_uid": user.uid},
-        {"$set": {"preferred_provider": provider, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        {
+            "$set": update_fields,
+            "$setOnInsert": {
+                "firebase_uid": user.uid,
+                "email": user.email,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            },
+        },
+        upsert=True,
     )
-    return {"message": "Preference saved", "preferred_provider": provider}
+    return {"message": "Preferences saved", "preferred_provider": provider, "preferred_model": payload.preferred_model}
+
+@api_router.get("/settings/api-keys")
+async def get_api_keys(user: AuthenticatedUser = Depends(get_current_user)):
+    """Return masked API keys so the UI can show which providers are configured."""
+    user_profile = await db.users.find_one({"firebase_uid": user.uid})
+    stored = (user_profile or {}).get("api_keys", {})
+    result: Dict[str, str] = {}
+    for provider in ("openai", "gemini", "claude"):
+        enc = stored.get(f"{provider}_enc", "")
+        plain = _safe_decrypt(enc) if enc else ""
+        result[f"{provider}_key_masked"] = _mask_key(plain)
+    return result
+
+@api_router.post("/settings/api-keys")
+async def save_api_keys(payload: ApiKeysUpdate, user: AuthenticatedUser = Depends(get_current_user)):
+    """Encrypt and store per-provider API keys for this user."""
+    fernet_key = os.environ.get("FERNET_KEY", "")
+    if not fernet_key:
+        raise HTTPException(status_code=503, detail="Server encryption not configured. Set FERNET_KEY in backend .env.")
+    from cryptography.fernet import Fernet as _Fernet
+    f = _Fernet(fernet_key.encode() if isinstance(fernet_key, str) else fernet_key)
+
+    def _enc(val: Optional[str]) -> str:
+        if not val or not val.strip():
+            return ""
+        return f.encrypt(val.strip().encode()).decode()
+
+    api_keys_update: Dict[str, str] = {}
+    if payload.openai_key is not None:
+        api_keys_update["api_keys.openai_enc"] = _enc(payload.openai_key)
+    if payload.gemini_key is not None:
+        api_keys_update["api_keys.gemini_enc"] = _enc(payload.gemini_key)
+    if payload.claude_key is not None:
+        api_keys_update["api_keys.claude_enc"] = _enc(payload.claude_key)
+
+    if not api_keys_update:
+        raise HTTPException(status_code=400, detail="No keys provided")
+
+    api_keys_update["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.users.update_one(
+        {"firebase_uid": user.uid},
+        {
+            "$set": api_keys_update,
+            "$setOnInsert": {
+                "firebase_uid": user.uid,
+                "email": user.email,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            },
+        },
+        upsert=True,
+    )
+    return {"message": "API keys saved successfully"}
 
 # ---------------------------------------------------------------------------
 # SEBI Disclaimer
@@ -677,13 +811,14 @@ async def get_technicals(request: Request, symbol: str):
 # AI Analysis
 @api_router.post("/stocks/{symbol}/ai-analysis")
 @limiter.limit("10/minute")
-async def get_ai_analysis(request_obj: Request, symbol: str, request: AIAnalysisRequest, user: AuthenticatedUser = Depends(get_current_user)):
+async def get_ai_analysis(request: Request, symbol: str, body: AIAnalysisRequest, user: AuthenticatedUser = Depends(get_current_user)):
     try:
         symbol = sanitize_symbol(symbol)
         await check_and_increment_quota(user.uid, "ai_analysis")
         user_profile = await db.users.find_one({"firebase_uid": user.uid})
-        preferred = user_profile.get("preferred_provider") if user_profile else None
-        settings = get_llm_config(preferred)
+        preferred_provider = user_profile.get("preferred_provider") if user_profile else None
+        preferred_model = user_profile.get("preferred_model") if user_profile else None
+        settings = get_llm_config(preferred_provider, preferred_model, user_profile)
 
         ticker = yf.Ticker(symbol)
         hist = ticker.history(period="1y", interval="1d")
@@ -701,7 +836,7 @@ async def get_ai_analysis(request_obj: Request, symbol: str, request: AIAnalysis
         sector = info.get("sector", "N/A")
         pe_ratio = safe_float(info.get("trailingPE"))
         market_cap = info.get("marketCap", "N/A")
-        timeframe_desc = "short-term (1 week to 1 month)" if request.timeframe == "short" else "long-term (3 months to 1 year)"
+        timeframe_desc = "short-term (1 week to 1 month)" if body.timeframe == "short" else "long-term (3 months to 1 year)"
         
         prompt = f"""You are a senior Indian stock market analyst AI. Analyze this stock and provide a clear BUY, SELL, or HOLD recommendation.
 
@@ -744,7 +879,7 @@ Return ONLY valid JSON:
         })
         
         analysis_doc = {
-            "id": str(uuid.uuid4()), "symbol": symbol, "timeframe": request.timeframe,
+            "id": str(uuid.uuid4()), "symbol": symbol, "timeframe": body.timeframe,
             "analysis": analysis, "current_price": current_price,
             "provider": settings["provider"], "model": settings["model"],
             "user_id": user.uid,
@@ -752,7 +887,7 @@ Return ONLY valid JSON:
         }
         await db.ai_analyses.insert_one(analysis_doc)
         
-        return {"symbol": symbol, "timeframe": request.timeframe, "current_price": current_price, "analysis": analysis, "support_resistance": sr_levels, "disclaimer": build_disclaimer_response_field(), "timestamp": analysis_doc["timestamp"]}
+        return {"symbol": symbol, "timeframe": body.timeframe, "current_price": current_price, "analysis": analysis, "support_resistance": sr_levels, "disclaimer": build_disclaimer_response_field(), "timestamp": analysis_doc["timestamp"]}
     except HTTPException:
         raise
     except Exception as e:
@@ -846,8 +981,9 @@ async def deep_scan_stocks(request: Request, user: AuthenticatedUser = Depends(g
     try:
         await check_and_increment_quota(user.uid, "deep_scan")
         user_profile = await db.users.find_one({"firebase_uid": user.uid})
-        preferred = user_profile.get("preferred_provider") if user_profile else None
-        settings = get_llm_config(preferred)
+        preferred_provider = user_profile.get("preferred_provider") if user_profile else None
+        preferred_model = user_profile.get("preferred_model") if user_profile else None
+        settings = get_llm_config(preferred_provider, preferred_model, user_profile)
         stocks = await get_nifty50_symbols()
         batch_data = []
         
@@ -897,14 +1033,15 @@ Include only stocks with strong signals (confidence > 60). Max 8 buy and 8 sell 
 # Chart Image Analysis - camera feature
 @api_router.post("/ai/analyze-chart-image")
 @limiter.limit("5/minute")
-async def analyze_chart_image(request_obj: Request, request: ChartImageRequest, user: AuthenticatedUser = Depends(get_current_user)):
+async def analyze_chart_image(request: Request, body: ChartImageRequest, user: AuthenticatedUser = Depends(get_current_user)):
     try:
         await check_and_increment_quota(user.uid, "chart_scan")
         user_profile = await db.users.find_one({"firebase_uid": user.uid})
-        preferred = user_profile.get("preferred_provider") if user_profile else None
-        settings = get_llm_config(preferred)
+        preferred_provider = user_profile.get("preferred_provider") if user_profile else None
+        preferred_model = user_profile.get("preferred_model") if user_profile else None
+        settings = get_llm_config(preferred_provider, preferred_model, user_profile)
 
-        img_data = validate_chart_image(request.image_base64)
+        img_data = validate_chart_image(body.image_base64)
         
         prompt = f"""You are an expert technical analyst specializing in candlestick chart pattern recognition for Indian stock markets (NSE/BSE).
 
@@ -915,7 +1052,7 @@ Analyze this candlestick chart image and provide:
 4. Predict whether the stock will go UP or DOWN based on the chart patterns
 5. Give a confidence level for your prediction
 
-{f'Additional context: {request.context}' if request.context else ''}
+{f'Additional context: {body.context}' if body.context else ''}
 
 Return ONLY valid JSON:
 {{"prediction":"UP" or "DOWN" or "SIDEWAYS","confidence":1-100,"trend":"Uptrend/Downtrend/Sideways","patterns_identified":["pattern1","pattern2"],"support_levels":["level1"],"resistance_levels":["level1"],"summary":"2-3 sentence analysis","recommendation":"BUY/SELL/HOLD","key_observations":["obs1","obs2","obs3"]}}"""
@@ -1399,7 +1536,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 import asyncio
 
-_FERNET_KEY = os.environ.get("FERNET_KEY", Fernet.generate_key().decode())
+_FERNET_KEY = os.environ.get("FERNET_KEY", "").strip() or Fernet.generate_key().decode()
 _fernet = Fernet(_FERNET_KEY.encode() if isinstance(_FERNET_KEY, str) else _FERNET_KEY)
 
 def _encrypt(value: str) -> str:

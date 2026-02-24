@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 # Supported providers & models
 # ---------------------------------------------------------------------------
 SUPPORTED_MODELS = {
-    "openai": ["gpt-5.2"],
-    "gemini": ["gemini-3.0"],
-    "claude": ["claude-sonnet-4-6", "claude-opus-4-5"],
+    "openai": ["gpt-5-mini", "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "o1", "o3-mini"],
+    "gemini": ["gemini-3.0", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"],
+    "claude": ["claude-sonnet-4-6", "claude-opus-4-5", "claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"],
 }
 
 
@@ -81,11 +81,12 @@ async def _call_openai(api_key: str, model: str, system_message: str, prompt: st
 
         messages.append({"role": "user", "content": user_content})
 
+        # Modern OpenAI models (gpt-5-mini, o1, o3, etc.) only accept the
+        # default temperature (1) — omit it entirely to avoid 400 errors.
         response = await client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=2048,
-            temperature=0.2,
+            max_completion_tokens=2048,
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
