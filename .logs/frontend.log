@@ -12,27 +12,23 @@ Your project may not work correctly until you install the expected versions of t
 Waiting on http://localhost:8082
 Logs for your project will appear below.
 Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 44.6% (362/542)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 64.3% (466/581)
-λ Bundled 6554ms node_modules/expo-router/node/render.js (918 modules)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 37.9% (263/427)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓░░░░░░░░░░ 37.7% (285/464)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 87.7% (753/804)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 88.1% (734/784)
+λ Bundled 8716ms node_modules/expo-router/node/render.js (919 modules)
+λ Bundled 1053ms node_modules/expo-router/node/render.js (1 module)
 "shadow*" style props are deprecated. Use "boxShadow".
-λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 96.9% (943/958)
-Web Bundled 7357ms node_modules/expo-router/entry.js (958 modules)
+"shadow*" style props are deprecated. Use "boxShadow".
+Web Bundled 10010ms node_modules/expo-router/entry.js (960 modules)
 Error: Premature close
     at onclose (node:internal/streams/end-of-stream:159:30)
     at processTicksAndRejections (node:internal/process/task_queues:77:11)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ Bundled 23ms node_modules/expo-router/node/render.js (1 module)
+Web Bundled 2302ms node_modules/expo-router/entry.js (1 module)
+Web node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 22.9% ( 97/266)
+λ Bundled 19ms node_modules/expo-router/node/render.js (1 module)
 "shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 694ms node_modules/expo-router/entry.js (1 module)
-Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-λ Bundled 71ms node_modules/expo-router/node/render.js (1 module)
-"shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 842ms node_modules/expo-router/entry.js (1 module)
-λ Bundled 27ms node_modules/expo-router/node/render.js (1 module)
-"shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 419ms node_modules/expo-router/entry.js (1 module)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 61.2% (567/725)
-Web Bundled 3524ms node_modules/expo-router/entry.js (965 modules)
+Web Bundled 395ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 3805ms node_modules/expo-router/entry.js (965 modules)
+Web Bundled 1767ms node_modules/expo-router/entry.js (1 module)
  LOG  [web] Logs will appear in the browser console

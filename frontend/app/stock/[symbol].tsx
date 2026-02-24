@@ -45,9 +45,12 @@ export default function StockDetailScreen() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [technicals, setTechnicals] = useState<Technicals | null>(null);
   const [supportResistance, setSupportResistance] = useState<any>(null);
+  const [fibLevels, setFibLevels] = useState<any>(null);
+  const [poc, setPoc] = useState<number | null>(null);
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
   const [fundamentals, setFundamentals] = useState<any>(null);
   const [stockNews, setStockNews] = useState<any[]>([]);
+  const [earnings, setEarnings] = useState<any>(null);
   const [optionChain, setOptionChain] = useState<any>(null);
   const [selectedExpiry, setSelectedExpiry] = useState<string | null>(null);
   const [greeks, setGreeks] = useState<any>(null);
@@ -77,6 +80,8 @@ export default function StockDetailScreen() {
       setQuote(quoteData);
       setTechnicals(techData.technicals);
       setSupportResistance(techData.support_resistance || quoteData.support_resistance || null);
+      setFibLevels(techData.fib_levels || null);
+      setPoc(techData.poc || null);
       const isInWl = (wlData.watchlist || []).some((w: any) => w.symbol === decodedSymbol);
       setInWatchlist(isInWl);
     } catch (e) {
@@ -87,6 +92,7 @@ export default function StockDetailScreen() {
     // Lazy-load non-critical data
     api.getFundamentals(decodedSymbol).then(res => setFundamentals(res.fundamentals)).catch(() => { });
     api.getStockNews(decodedSymbol, 8).then(res => setStockNews(res.articles || [])).catch(() => { });
+    api.getEarnings(decodedSymbol).then(res => setEarnings(res)).catch(() => { });
     api.getOptionChain(decodedSymbol).then(res => {
       setOptionChain(res);
       if (res.expiry_dates?.[0]) setSelectedExpiry(res.expiry_dates[0]);
@@ -309,6 +315,30 @@ export default function StockDetailScreen() {
               </View>
             )}
 
+            {/* Advanced Technicals (Fibonacci & Volume Profile) */}
+            {fibLevels?.levels && (
+              <View style={styles.srCard}>
+                <Text style={styles.cardTitle}>Advanced Technicals</Text>
+                {poc !== null && (
+                  <View style={{ marginBottom: 16 }}>
+                    <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 4 }}>Volume Profile (POC)</Text>
+                    <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '700' }}>{formatCurrency(poc)}</Text>
+                  </View>
+                )}
+                <View style={styles.srGrid}>
+                  <View style={styles.srSection}>
+                    <Text style={[styles.srSectionTitle, { color: colors.textSecondary }]}>Fibonacci Retracement</Text>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>0.0% (High)</Text><Text style={styles.srLevelValue}>{formatCurrency(fibLevels.levels.level_0)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>23.6%</Text><Text style={styles.srLevelValue}>{formatCurrency(fibLevels.levels.level_23_6)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>38.2%</Text><Text style={styles.srLevelValue}>{formatCurrency(fibLevels.levels.level_38_2)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>50.0%</Text><Text style={styles.srLevelValue}>{formatCurrency(fibLevels.levels.level_50_0)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>61.8%</Text><Text style={styles.srLevelValue}>{formatCurrency(fibLevels.levels.level_61_8)}</Text></View>
+                    <View style={styles.srLevel}><Text style={styles.srLevelLabel}>100% (Low)</Text><Text style={styles.srLevelValue}>{formatCurrency(fibLevels.levels.level_100)}</Text></View>
+                  </View>
+                </View>
+              </View>
+            )}
+
             {/* Technical Indicators */}
             {technicals && (
               <View style={styles.techCard}>
@@ -372,6 +402,15 @@ export default function StockDetailScreen() {
                       <Text style={styles.recConfidence}>Confidence: {aiResult.confidence}%</Text>
                     </View>
                   </View>
+                  {(aiResult as any).multi_timeframe_sentiment && (
+                    <View style={{ marginBottom: 16 }}>
+                      <Text style={styles.aiSectionTitle}>Timeframe Confluence</Text>
+                      <View style={[styles.reasonRow, { alignItems: 'center' }]}>
+                        <Ionicons name="shuffle" size={16} color={colors.accent} />
+                        <Text style={[styles.reasonText, { fontWeight: '600' }]}>{(aiResult as any).multi_timeframe_sentiment}</Text>
+                      </View>
+                    </View>
+                  )}
                   <View style={styles.targetRow}>
                     <View style={styles.targetCol}><Text style={styles.targetLabel}>Target Price</Text><Text style={[styles.targetValue, { color: colors.profit }]}>{formatCurrency(aiResult.target_price)}</Text></View>
                     <View style={styles.targetCol}><Text style={styles.targetLabel}>Stop Loss</Text><Text style={[styles.targetValue, { color: colors.loss }]}>{formatCurrency(aiResult.stop_loss)}</Text></View>
@@ -442,6 +481,47 @@ export default function StockDetailScreen() {
                 </View>
               </View>
             ))}
+            
+            {/* Earnings Calendar Section */}
+            {earnings && (earnings.upcoming?.length > 0 || earnings.historical?.length > 0) && (
+              <View style={styles.fundCard}>
+                <Text style={styles.cardTitle}>Earnings Calendar</Text>
+                
+                {earnings.upcoming?.length > 0 && (
+                  <View style={{ marginBottom: 16 }}>
+                    <Text style={[styles.aiSectionTitle, { color: colors.accent, marginTop: 0 }]}>Upcoming Date</Text>
+                    {earnings.upcoming.slice(0, 1).map((e: any, i: number) => (
+                      <View key={i} style={styles.reasonRow}>
+                        <Ionicons name="calendar-outline" size={16} color={colors.accent} />
+                        <Text style={[styles.reasonText, { fontWeight: '700', color: colors.text }]}>{e.date?.split(' ')[0] || 'TBD'}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                
+                {earnings.historical?.length > 0 && (
+                  <View>
+                    <Text style={[styles.aiSectionTitle, { marginTop: 0 }]}>Recent Earnings</Text>
+                    {earnings.historical.slice(0, 3).map((e: any, i: number) => (
+                      <View key={i} style={[styles.techRow, { borderBottomWidth: i === 2 ? 0 : 1 }]}>
+                        <View>
+                          <Text style={[styles.techName, { fontWeight: '600' }]}>{e.date?.split(' ')[0] || 'N/A'}</Text>
+                          <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 2 }}>Est: {e.eps_estimate || '-'} | Act: {e.eps_actual || '-'}</Text>
+                        </View>
+                        {e.surprise_pct != null && (
+                          <View style={[styles.techSignal, { backgroundColor: e.surprise_pct >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)' }]}>
+                            <Text style={[styles.techSignalText, { color: e.surprise_pct >= 0 ? colors.profit : colors.loss }]}>
+                              {e.surprise_pct >= 0 ? '+' : ''}{e.surprise_pct}%
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+            
           </View>
         )}
         {activeTab === 'fundamentals' && !fundamentals && (

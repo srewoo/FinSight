@@ -16,6 +16,7 @@ import numpy as np
 import json
 import re
 
+from math_utils import compute_fibonacci_levels, compute_volume_profile_poc
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -736,6 +737,8 @@ async def get_stock_quote(request: Request, symbol: str):
         change_pct = round((change / prev) * 100, 2) if prev else 0
         
         sr_levels = compute_support_resistance(hist)
+        fib_levels = compute_fibonacci_levels(hist)
+        poc = compute_volume_profile_poc(hist)
         
         return {
             "symbol": symbol,
@@ -802,6 +805,8 @@ async def get_technicals(request: Request, symbol: str):
             raise HTTPException(status_code=404, detail="No data found")
         technicals = compute_technicals(hist)
         sr_levels = compute_support_resistance(hist)
+        fib_levels = compute_fibonacci_levels(hist)
+        poc = compute_volume_profile_poc(hist)
         return {"symbol": symbol, "technicals": technicals, "support_resistance": sr_levels}
     except HTTPException:
         raise
@@ -821,13 +826,23 @@ async def get_ai_analysis(request: Request, symbol: str, body: AIAnalysisRequest
         settings = get_llm_config(preferred_provider, preferred_model, user_profile)
 
         ticker = yf.Ticker(symbol)
+        # Fetch multiple timeframes for confluence
         hist = ticker.history(period="1y", interval="1d")
+        hist_1wk = ticker.history(period="2y", interval="1wk")
+        hist_15m = ticker.history(period="5d", interval="15m")
         info = ticker.info
+        
         if hist.empty:
             raise HTTPException(status_code=404, detail="No data found")
         
         technicals = compute_technicals(hist)
+        technicals_1wk = compute_technicals(hist_1wk)
+        technicals_15m = compute_technicals(hist_15m)
+        
         sr_levels = compute_support_resistance(hist)
+        fib_levels = compute_fibonacci_levels(hist)
+        poc = compute_volume_profile_poc(hist)
+        
         current_price = safe_float(hist['Close'].iloc[-1])
         prices_5d = [safe_float(p) for p in hist['Close'].tail(5).tolist()]
         prices_30d = [safe_float(p) for p in hist['Close'].tail(30).tolist()]
@@ -838,31 +853,36 @@ async def get_ai_analysis(request: Request, symbol: str, body: AIAnalysisRequest
         market_cap = info.get("marketCap", "N/A")
         timeframe_desc = "short-term (1 week to 1 month)" if body.timeframe == "short" else "long-term (3 months to 1 year)"
         
-        prompt = f"""You are a senior Indian stock market analyst AI. Analyze this stock and provide a clear BUY, SELL, or HOLD recommendation.
+        prompt = f"""You are a senior Indian stock market analyst AI. Analyze this stock and provide a clear BUY, SELL, or HOLD recommendation using Multi-Timeframe Confluence and Advanced Technicals.
 
 STOCK: {stock_name} ({symbol})
 Sector: {sector} | P/E: {pe_ratio} | Market Cap: {market_cap}
 Current Price: ₹{current_price}
 
-TECHNICAL INDICATORS:
+MULTI-TIMEFRAME CONFLUENCE:
+- Daily (1D) Trend: MACD {technicals.get('macd',{}).get('signal')}, RSI {technicals.get('rsi')}
+- Weekly (1W) Trend: MACD {technicals_1wk.get('macd',{}).get('signal')}, RSI {technicals_1wk.get('rsi')} 
+- Intraday (15M) Trend: MACD {technicals_15m.get('macd',{}).get('signal')}, RSI {technicals_15m.get('rsi')}
+
+DAILY TECHNICAL INDICATORS:
 - RSI(14): {technicals.get('rsi')} ({technicals.get('rsi_signal')})
 - ADX: {technicals.get('adx')}
-- MACD: Line={technicals.get('macd',{}).get('macd_line')}, Signal={technicals.get('macd',{}).get('signal_line')}, Hist={technicals.get('macd',{}).get('histogram')} ({technicals.get('macd',{}).get('signal')})
+- MACD: Line={technicals.get('macd',{}).get('macd_line')}, Signal={technicals.get('macd',{}).get('signal_line')}, Hist={technicals.get('macd',{}).get('histogram')}
 - SMA20={technicals.get('moving_averages',{}).get('sma20')}, SMA50={technicals.get('moving_averages',{}).get('sma50')}, SMA200={technicals.get('moving_averages',{}).get('sma200')}
-- Bollinger: Upper={technicals.get('bollinger_bands',{}).get('upper')}, Lower={technicals.get('bollinger_bands',{}).get('lower')} ({technicals.get('bollinger_bands',{}).get('signal')})
+- Bollinger: {technicals.get('bollinger_bands',{}).get('signal')}
 
-SUPPORT/RESISTANCE:
-- Pivot: {sr_levels.get('pivot')}
-- R1={sr_levels.get('resistance',{}).get('r1')}, R2={sr_levels.get('resistance',{}).get('r2')}, R3={sr_levels.get('resistance',{}).get('r3')}
-- S1={sr_levels.get('support',{}).get('s1')}, S2={sr_levels.get('support',{}).get('s2')}, S3={sr_levels.get('support',{}).get('s3')}
-- 6M High={sr_levels.get('period_highs_lows',{}).get('high_6m')}, 6M Low={sr_levels.get('period_highs_lows',{}).get('low_6m')}
+ADVANCED TECHNICALS (SUPPORT/RESISTANCE):
+- Volume Profile Point of Control (POC): ₹{poc} (highest volume traded price)
+- Fibonacci Levels: 0%={fib_levels.get('levels',{}).get('level_0')}, 23.6%={fib_levels.get('levels',{}).get('level_23_6')}, 38.2%={fib_levels.get('levels',{}).get('level_38_2')}, 50%={fib_levels.get('levels',{}).get('level_50_0')}, 61.8%={fib_levels.get('levels',{}).get('level_61_8')}
+- Classic Pivot: {sr_levels.get('pivot')}, R1={sr_levels.get('resistance',{}).get('r1')}, S1={sr_levels.get('support',{}).get('s1')}
 
-RECENT PRICES (5d): {prices_5d}
-30-DAY RANGE: ₹{min(p for p in prices_30d if p)} - ₹{max(p for p in prices_30d if p)}
-Timeframe: {timeframe_desc}
+RECENT ACTIVITY:
+- 5d Prices: {prices_5d}
+- 30-day Range: ₹{min(p for p in prices_30d if p)} - ₹{max(p for p in prices_30d if p)}
+- Analysis Timeframe: {timeframe_desc}
 
 Return ONLY valid JSON:
-{{"recommendation":"BUY/SELL/HOLD","confidence":1-100,"target_price":number,"stop_loss":number,"summary":"2-3 sentences","key_reasons":["r1","r2","r3"],"risks":["risk1","risk2"],"technical_outlook":"1-2 sentences","sentiment":"Bullish/Bearish/Neutral"}}"""
+{{"recommendation":"BUY/SELL/HOLD","confidence":1-100,"target_price":number,"stop_loss":number,"summary":"2-3 sentences","key_reasons":["r1","r2","r3"],"risks":["risk1","risk2"],"technical_outlook":"1-2 sentences","sentiment":"Bullish/Bearish/Neutral","multi_timeframe_sentiment":"Bullish/Bearish/Mixed"}}"""
 
         response = await call_llm(
             provider=settings["provider"],
@@ -887,7 +907,7 @@ Return ONLY valid JSON:
         }
         await db.ai_analyses.insert_one(analysis_doc)
         
-        return {"symbol": symbol, "timeframe": body.timeframe, "current_price": current_price, "analysis": analysis, "support_resistance": sr_levels, "disclaimer": build_disclaimer_response_field(), "timestamp": analysis_doc["timestamp"]}
+        return {"symbol": symbol, "timeframe": body.timeframe, "current_price": current_price, "analysis": analysis, "support_resistance": sr_levels, "fib_levels": fib_levels, "poc": poc, "disclaimer": build_disclaimer_response_field(), "timestamp": analysis_doc["timestamp"]}
     except HTTPException:
         raise
     except Exception as e:
@@ -911,6 +931,8 @@ async def get_auto_recommendations():
                 
                 technicals = compute_technicals(hist)
                 sr_levels = compute_support_resistance(hist)
+                fib_levels = compute_fibonacci_levels(hist)
+                poc = compute_volume_profile_poc(hist)
                 current_price = safe_float(hist['Close'].iloc[-1])
                 prev_price = safe_float(hist['Close'].iloc[-2]) if len(hist) > 1 else current_price
                 change_pct = round(((current_price - prev_price) / prev_price) * 100, 2) if prev_price else 0
@@ -1334,6 +1356,47 @@ async def get_stock_news_endpoint(request: Request, symbol: str, limit: int = Qu
     articles = get_stock_news(sym, limit)
     return {"symbol": sym, "articles": articles, "count": len(articles)}
 
+@api_router.get("/stocks/{symbol}/earnings")
+@limiter.limit("30/minute")
+async def get_stock_earnings(request: Request, symbol: str):
+    """Return upcoming and historical earnings dates for a stock."""
+    sym = sanitize_symbol(symbol)
+    try:
+        ticker = yf.Ticker(sym)
+        calendar = ticker.calendar
+        earnings_dates = ticker.earnings_dates
+        
+        upcoming = []
+        historical = []
+        
+        # Parse yfinance earnings_dates if available
+        if earnings_dates is not None and not earnings_dates.empty:
+            for dt, row in earnings_dates.iterrows():
+                try:
+                    date_str = dt.strftime("%Y-%m-%d %H:%M:%S") if hasattr(dt, 'strftime') else str(dt)
+                    item = {
+                        "date": date_str,
+                        "eps_estimate": safe_float(row.get('EPS Estimate')),
+                        "eps_actual": safe_float(row.get('Reported EPS')),
+                        "surprise_pct": safe_float(row.get('Surprise(%)'))
+                    }
+                    if item["eps_actual"] is None:
+                        upcoming.append(item)
+                    else:
+                        historical.append(item)
+                except Exception:
+                    continue
+                    
+        return {
+            "symbol": sym,
+            "upcoming": upcoming,
+            "historical": historical[:10] if historical else []
+        }
+    except Exception as e:
+        logger.error(f"Error fetching earnings for {sym}: {e}")
+        return {"symbol": sym, "upcoming": [], "historical": []} # Return empty gracefully
+
+
 # ---------------------------------------------------------------------------
 # Phase 2.3 — Breakout Scanner
 # ---------------------------------------------------------------------------
@@ -1526,6 +1589,188 @@ async def get_sector_heatmap(request: Request):
         },
     }
 
+
+
+# ---------------------------------------------------------------------------
+# Phase 2.5 — AI Daily Morning Brief
+# ---------------------------------------------------------------------------
+_morning_brief_cache = {}
+
+@api_router.get("/market/morning-brief")
+@limiter.limit("10/minute")
+async def get_morning_brief(request: Request, user: AuthenticatedUser = Depends(get_current_user)):
+    """Generates a daily morning brief based on overnight global markets and SGX Nifty/News."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    # Check cache first
+    if today in _morning_brief_cache:
+        return _morning_brief_cache[today]
+        
+    try:
+        # Fetch US Markets (S&P 500, Nasdaq)
+        us_indices = {}
+        for sym, name in [("^GSPC", "S&P 500"), ("^IXIC", "Nasdaq")]:
+            try:
+                hist = yf.Ticker(sym).history(period="2d")
+                if not hist.empty and len(hist) > 1:
+                    c = safe_float(hist['Close'].iloc[-1])
+                    p = safe_float(hist['Close'].iloc[-2])
+                    pct = round((c - p) / p * 100, 2)
+                    us_indices[name] = f"{pct}%"
+            except: pass
+            
+        # Fetch latest top market news 
+        news = get_market_news_feeds(max_items=3)
+        news_titles = [n['title'] for n in news]
+        
+        user_profile = await db.users.find_one({"firebase_uid": user.uid})
+        preferred_provider = user_profile.get("preferred_provider") if user_profile else None
+        preferred_model = user_profile.get("preferred_model") if user_profile else None
+        settings = get_llm_config(preferred_provider, preferred_model, user_profile)
+        
+        prompt = f"""You are the Chief Market Strategist for TradeMind AI, an Indian stock market app.
+Write a concise, punchy "Daily Morning Brief" for traders opening the app at 9:00 AM.
+
+DATA PROVIDED:
+- Overnight US Markets: S&P 500 {us_indices.get('S&P 500', 'N/A')}, Nasdaq {us_indices.get('Nasdaq', 'N/A')}
+- Top News Headlines: {news_titles}
+
+REQUIREMENTS:
+Return valid JSON representing a 3-point brief:
+1. `global_cues`: 1 sentence summarizing the overnight global mood affecting India today.
+2. `market_setup`: 1 sentence summarizing the likely opening setup for Nifty/BankNifty.
+3. `theme_of_the_day`: 1 short sentence on which sector/theme to watch based on news.
+4. `sentiment`: "Bullish", "Bearish", or "Neutral"
+
+JSON FORMAT EXACTLY:
+{{"global_cues": "...", "market_setup": "...", "theme_of_the_day": "...", "sentiment": "Neutral"}}
+"""
+        response = await call_llm(
+            provider=settings["provider"],
+            model=settings["model"],
+            api_key=settings["api_key"],
+            prompt=prompt
+        )
+        
+        brief = parse_llm_json(response, {
+            "global_cues": "Global markets were mixed overnight...",
+            "market_setup": "Indian markets are expected to open relatively flat.",
+            "theme_of_the_day": "Watch specific stock action rather than indices.",
+            "sentiment": "Neutral"
+        })
+        
+        result = {
+            "date": today,
+            "brief": brief,
+            "us_markets": us_indices,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Cache it for the day
+        _morning_brief_cache[today] = result
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error generating morning brief: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate morning brief")
+
+
+# ---------------------------------------------------------------------------
+# Phase 2.6 — Price & Technical Alerts (In-App)
+# ---------------------------------------------------------------------------
+
+class AlertCreate(BaseModel):
+    symbol: str
+    target_price: Optional[float] = None
+    condition: str = "above" # 'above' or 'below'
+    notes: Optional[str] = None
+
+@api_router.get("/alerts")
+async def get_alerts(user: AuthenticatedUser = Depends(get_current_user)):
+    """Get all active alerts for the user."""
+    cursor = db.alerts.find({"user_id": user.uid, "is_active": True}).sort("created_at", -1)
+    alerts = await cursor.to_list(length=100)
+    for a in alerts:
+        a["_id"] = str(a["_id"])
+    return {"alerts": alerts}
+
+@api_router.post("/alerts")
+async def create_alert(payload: AlertCreate, user: AuthenticatedUser = Depends(get_current_user)):
+    """Create a new price alert."""
+    alert_doc = {
+        "user_id": user.uid,
+        "symbol": sanitize_symbol(payload.symbol),
+        "target_price": payload.target_price,
+        "condition": payload.condition,
+        "notes": payload.notes,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "triggered_at": None
+    }
+    result = await db.alerts.insert_one(alert_doc)
+    alert_doc["_id"] = str(result.inserted_id)
+    return {"message": "Alert created", "alert": alert_doc}
+
+@api_router.delete("/alerts/{alert_id}")
+async def delete_alert(alert_id: str, user: AuthenticatedUser = Depends(get_current_user)):
+    """Delete or deactivate an alert."""
+    from bson import ObjectId
+    try:
+        oid = ObjectId(alert_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid alert ID format")
+        
+    result = await db.alerts.update_one(
+        {"_id": oid, "user_id": user.uid},
+        {"$set": {"is_active": False}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Alert not found or already inactive")
+    return {"message": "Alert removed"}
+
+@api_router.get("/alerts/evaluate")
+async def evaluate_alerts(user: AuthenticatedUser = Depends(get_current_user)):
+    """Evaluate all active alerts for the user against current market prices. Returns triggered alerts."""
+    cursor = db.alerts.find({"user_id": user.uid, "is_active": True})
+    alerts = await cursor.to_list(length=50)
+    
+    triggered = []
+    
+    # Needs optimization in production, but okay for MVP to loop yfinance
+    for alert in alerts:
+        try:
+            sym = alert["symbol"]
+            info = yf.Ticker(sym).fast_info
+            current_price = safe_float(info.last_price)
+            
+            if not current_price or not alert.get("target_price"):
+                continue
+                
+            is_triggered = False
+            if alert["condition"] == "above" and current_price >= alert["target_price"]:
+                is_triggered = True
+            elif alert["condition"] == "below" and current_price <= alert["target_price"]:
+                is_triggered = True
+                
+            if is_triggered:
+                # Mark as triggered/inactive
+                await db.alerts.update_one(
+                    {"_id": alert["_id"]},
+                    {"$set": {
+                        "is_active": False, 
+                        "triggered_at": datetime.now(timezone.utc).isoformat(),
+                        "trigger_price": current_price
+                    }}
+                )
+                
+                alert["_id"] = str(alert["_id"])
+                alert["trigger_price"] = current_price
+                triggered.append(alert)
+                
+        except Exception as e:
+            logger.warning(f"Failed to evaluate alert {alert['_id']} for {alert.get('symbol')}: {e}")
+            
+    return {"triggered": triggered}
 
 # ---------------------------------------------------------------------------
 # Phase 3.1 — Angel One SmartAPI Broker Endpoints

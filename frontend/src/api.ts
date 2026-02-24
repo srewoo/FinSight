@@ -60,9 +60,11 @@ export const api = {
   getHistory: (symbol: string, period = '1mo', interval = '1d') =>
     request(`/stocks/${encodeURIComponent(symbol)}/history?period=${period}&interval=${interval}`),
   getTechnicals: (symbol: string) => request(`/stocks/${encodeURIComponent(symbol)}/technicals`),
+  getEarnings: (symbol: string) => request(`/stocks/${encodeURIComponent(symbol)}/earnings`),
   getFundamentals: (symbol: string) => request(`/stocks/${encodeURIComponent(symbol)}/fundamentals`),
   getStockNews: (symbol: string, limit = 10) =>
     request(`/stocks/${encodeURIComponent(symbol)}/news?limit=${limit}`),
+  getMorningBrief: () => request('/market/morning-brief'),
 
   // ── AI ───────────────────────────────────────────────────────────────────
   getAIAnalysis: (symbol: string, timeframe = 'short') =>
@@ -95,6 +97,12 @@ export const api = {
     request(`/options/${encodeURIComponent(symbol)}/chain${expiry ? `?expiry=${encodeURIComponent(expiry)}` : ''}`),
   getOptionGreeks: (symbol: string, strike: number, optionType: string, expiry: string) =>
     request(`/options/${encodeURIComponent(symbol)}/greeks?strike=${strike}&option_type=${optionType}&expiry=${encodeURIComponent(expiry)}`),
+
+  // ── Alerts ─────────────────────────────────────────────────────────────────
+  getAlerts: () => request('/alerts'),
+  createAlert: (data: { symbol: string, target_price: number, condition: string, notes?: string }) => request('/alerts', { method: 'POST', body: JSON.stringify(data) }),
+  deleteAlert: (id: string) => request(`/alerts/${id}`, { method: 'DELETE' }),
+  evaluateAlerts: () => request('/alerts/evaluate'),
 
   // ── Broker ────────────────────────────────────────────────────────────────
   brokerConnect: (data: { provider?: string; api_key: string; client_id: string; pin: string; totp_secret: string }) =>

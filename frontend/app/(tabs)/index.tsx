@@ -43,6 +43,7 @@ export default function HomeScreen() {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [sectors, setSectors] = useState<any[]>([]);
   const [sectorBreadth, setSectorBreadth] = useState<any>(null);
+  const [morningBrief, setMorningBrief] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
@@ -114,6 +115,7 @@ export default function HomeScreen() {
       setSectors(res.sectors || []);
       setSectorBreadth(res.market_breadth || null);
     }).catch(() => { });
+    api.getMorningBrief().then((res: any) => setMorningBrief(res)).catch(() => { });
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -158,6 +160,43 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
+
+        {/* AI Morning Brief Card */}
+        {morningBrief && (
+          <View style={styles.briefCard}>
+            <View style={styles.briefHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="sunny" size={20} color="#F59E0B" />
+                <Text style={styles.briefTitle}>Morning Brief</Text>
+              </View>
+              <Text style={styles.briefDate}>{morningBrief.date}</Text>
+            </View>
+            
+            <View style={styles.briefContentRow}>
+              <Ionicons name="globe-outline" size={16} color={colors.primary} style={{ marginTop: 2 }} />
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.briefPointTitle}>Overnight Global Cues</Text>
+                <Text style={styles.briefPointText}>{morningBrief.brief?.global_cues}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.briefContentRow}>
+              <Ionicons name="trending-up-outline" size={16} color={colors.primary} style={{ marginTop: 2 }} />
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.briefPointTitle}>Opening Market Setup</Text>
+                <Text style={styles.briefPointText}>{morningBrief.brief?.market_setup}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.briefContentRow}>
+              <Ionicons name="bulb-outline" size={16} color={colors.primary} style={{ marginTop: 2 }} />
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.briefPointTitle}>Theme of the Day</Text>
+                <Text style={styles.briefPointText}>{morningBrief.brief?.theme_of_the_day}</Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Market Indices */}
         <Text style={styles.sectionTitle}>Market Indices</Text>
@@ -317,4 +356,11 @@ const styles = StyleSheet.create({
   liveText: { color: colors.textMuted, fontSize: 12 },
   marketStatusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
   marketStatusText: { fontSize: 11, fontWeight: '600' },
+  briefCard: { backgroundColor: 'rgba(124,58,237,0.08)', borderRadius: 20, padding: 18, marginBottom: 28, borderWidth: 1, borderColor: 'rgba(124,58,237,0.2)' },
+  briefHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(124,58,237,0.15)', paddingBottom: 12 },
+  briefTitle: { color: colors.text, fontSize: 17, fontWeight: '700' },
+  briefDate: { color: colors.textMuted, fontSize: 12, fontWeight: '600' },
+  briefContentRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14 },
+  briefPointTitle: { color: colors.text, fontSize: 13, fontWeight: '700', marginBottom: 2 },
+  briefPointText: { color: colors.textSecondary, fontSize: 13, lineHeight: 20 },
 });

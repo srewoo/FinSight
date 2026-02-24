@@ -1,191 +1,908 @@
 INFO:     Will watch for changes in these directories: ['/Users/sharajrewoo/DemoReposQA/FinSight/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [86917] using StatReload
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [86922]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:59194 - "GET /api/ HTTP/1.1" 200 OK
-INFO:     ('127.0.0.1', 59206) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     ('127.0.0.1', 59208) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     127.0.0.1:59234 - "OPTIONS /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59235 - "OPTIONS /api/settings/api-keys HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59235 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59234 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59255 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59257 - "POST /api/settings/api-keys HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59257 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     Started reloader process [13739] using StatReload
+Process SpawnProcess-1:
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 315, in _bootstrap
+    self.run()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/_subprocess.py", line 76, in subprocess_started
+    target(sockets=sockets)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/server.py", line 61, in run
+    return asyncio.run(self.serve(sockets=sockets))
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/server.py", line 68, in serve
+    config.load()
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/config.py", line 467, in load
+    self.loaded_app = import_from_string(self.app)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/importer.py", line 21, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 934
+    fib_levels = compute_fibonacci_levels(hist)
+IndentationError: unexpected unindent
 WARNING:  StatReload detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     connection closed
-INFO:     connection closed
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [86922]
 /Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
   warnings.warn(
-INFO:     Started server process [88651]
+INFO:     Started server process [14891]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     ('127.0.0.1', 59346) - "WebSocket /ws/prices" [accepted]
+INFO:     127.0.0.1:62574 - "GET /api/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62631 - "OPTIONS /api/broker/status HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 62633) - "WebSocket /ws/prices" [accepted]
 INFO:     connection open
-INFO:     ('127.0.0.1', 59349) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-WARNING:  StatReload detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     connection closed
-INFO:     connection closed
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [88651]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [88727]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     ('127.0.0.1', 59354) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     ('127.0.0.1', 59356) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     127.0.0.1:59394 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59395 - "POST /api/settings/api-keys HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59395 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59412 - "OPTIONS /api/stocks/POWERGRID.NS/quote HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59414 - "OPTIONS /api/stocks/POWERGRID.NS/technicals HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59417 - "OPTIONS /api/watchlist HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59418 - "OPTIONS /api/stocks/POWERGRID.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59418 - "GET /api/stocks/POWERGRID.NS/quote HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59417 - "GET /api/stocks/POWERGRID.NS/technicals HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59412 - "GET /api/stocks/POWERGRID.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59414 - "GET /api/watchlist HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59414 - "OPTIONS /api/stocks/POWERGRID.NS/fundamentals HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59412 - "OPTIONS /api/stocks/POWERGRID.NS/news?limit=8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59417 - "OPTIONS /api/options/POWERGRID.NS/chain HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59417 - "GET /api/stocks/POWERGRID.NS/news?limit=8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59414 - "GET /api/stocks/POWERGRID.NS/fundamentals HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59412 - "GET /api/options/POWERGRID.NS/chain HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59417 - "OPTIONS /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 200 OK
-2026-02-24 12:03:26,764 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 403 Forbidden"
-2026-02-24 12:03:26,765 - llm_client - ERROR - OpenAI call failed: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
-2026-02-24 12:03:26,765 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
-INFO:     127.0.0.1:59417 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
-2026-02-24 12:03:41,528 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 403 Forbidden"
-2026-02-24 12:03:41,528 - llm_client - ERROR - OpenAI call failed: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
-2026-02-24 12:03:41,528 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5-mini`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
-INFO:     127.0.0.1:59473 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
-WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
-INFO:     Shutting down
-INFO:     connection closed
-INFO:     connection closed
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [88727]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [92668]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     ('127.0.0.1', 60516) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     ('127.0.0.1', 60524) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-WARNING:  StatReload detected changes in 'tests/test_llm_client.py'. Reloading...
-INFO:     Shutting down
-INFO:     connection closed
-INFO:     connection closed
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [92668]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [92819]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     ('127.0.0.1', 60585) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     ('127.0.0.1', 60587) - "WebSocket /ws/prices" [accepted]
-INFO:     connWARNING:  StatReload detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     connection closed
-INFO:     connection closed
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [92819]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [92966]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     ('127.0.0.1', 60635) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     ('127.0.0.1', 60638) - "WebSocket /ws/prices" [accepted]
-INFO:     connection open
-INFO:     connection closed
-INFO:     connection closed
-INFO:     127.0.0.1:60721 - "OPTIONS /api/broker/status HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60712 - "GET /api/stocks/POWERGRID.NS/quote HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60714 - "GET /api/stocks/POWERGRID.NS/technicals HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60718 - "GET /api/stocks/POWERGRID.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60717 - "GET /api/watchlist HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60721 - "GET /api/broker/status HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60721 - "GET /api/stocks/POWERGRID.NS/fundamentals HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60717 - "GET /api/stocks/POWERGRID.NS/news?limit=8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60718 - "GET /api/options/POWERGRID.NS/chain HTTP/1.1" 200 OK
-2026-02-24 12:07:48,978 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 400 Bad Request"
-2026-02-24 12:07:48,979 - llm_client - ERROR - OpenAI call failed: Error code: 400 - {'error': {'message': "Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}
-2026-02-24 12:07:48,979 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 400 - {'error': {'message': "Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}
-INFO:     127.0.0.1:60718 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
-WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [92966]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [94374]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [94374]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [94512]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-2026-02-24 12:09:36,163 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 403 Forbidden"
-2026-02-24 12:09:36,165 - llm_client - ERROR - OpenAI call failed: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5.2`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
-2026-02-24 12:09:36,165 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 403 - {'error': {'message': 'Project `proj_8Is2janeGyjOsZgQ8WSQjgOO` does not have access to model `gpt-5.2`', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
-INFO:     127.0.0.1:60886 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
-WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [94512]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [95583]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:61403 - "OPTIONS /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 200 OK
-2026-02-24 12:14:13,633 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 400 Bad Request"
-2026-02-24 12:14:13,635 - llm_client - ERROR - OpenAI call failed: Error code: 400 - {'error': {'message': "Unsupported value: 'temperature' does not support 0.2 with this model. Only the default (1) value is supported.", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsupported_value'}}
-2026-02-24 12:14:13,635 - server - ERROR - Error in AI analysis for POWERGRID.NS: OpenAI error: Error code: 400 - {'error': {'message': "Unsupported value: 'temperature' does not support 0.2 with this model. Only the default (1) value is supported.", 'type': 'invalid_request_error', 'param': 'temperature', 'code': 'unsupported_value'}}
-INFO:     127.0.0.1:61403 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 500 Internal Server Error
-WARNING:  StatReload detected changes in 'llm_client.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [95583]
-/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
-  warnings.warn(
-INFO:     Started server process [99114]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-2026-02-24 12:24:17,254 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-INFO:     127.0.0.1:62042 - "POST /api/stocks/POWERGRID.NS/ai-analysis HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62636 - "OPTIONS /api/market/indices HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62638 - "OPTIONS /api/market/top-movers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62638 - "GET /api/market/indices HTTP/1.1" 200 OK
+2026-02-24 15:38:51,096 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+INFO:     127.0.0.1:62631 - "GET /api/broker/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62636 - "GET /api/market/top-movers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62636 - "OPTIONS /api/market/news?limit=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62631 - "OPTIONS /api/market/sector-heatmap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62638 - "OPTIONS /api/market/morning-brief HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62631 - "GET /api/market/sector-heatmap HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+  |     response_sent.set()
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  | exceptiongroup.ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    |     return await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response_sent.set()
+    |   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    |     self.gen.throw(type, value, traceback)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    |     return await call_next(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    |     response = await func(*args, **kwargs)  # type: ignore
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1536, in get_sector_heatmap
+    |     for sym_info in symbols_data:
+    | TypeError: 'coroutine' object is not iterable
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response_sent.set()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    return await call_next(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1536, in get_sector_heatmap
+    for sym_info in symbols_data:
+TypeError: 'coroutine' object is not iterable
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/pydantic/_internal/_typing_extra.py:305: RuntimeWarning: coroutine 'get_nifty50_symbols' was never awaited
+  return cls.__dict__.get('__annotations__', {})
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+INFO:     127.0.0.1:62636 - "GET /api/market/news?limit=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62636 - "GET /api/market/sector-heatmap HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+  |     response_sent.set()
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  | exceptiongroup.ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    |     return await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response_sent.set()
+    |   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    |     self.gen.throw(type, value, traceback)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    |     return await call_next(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    |     response = await func(*args, **kwargs)  # type: ignore
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1536, in get_sector_heatmap
+    |     for sym_info in symbols_data:
+    | TypeError: 'coroutine' object is not iterable
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response_sent.set()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    return await call_next(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1536, in get_sector_heatmap
+    for sym_info in symbols_data:
+TypeError: 'coroutine' object is not iterable
+INFO:     127.0.0.1:62666 - "GET /api/market/sector-heatmap HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+  |     response_sent.set()
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  | exceptiongroup.ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    |     return await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response_sent.set()
+    |   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    |     self.gen.throw(type, value, traceback)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    |     return await call_next(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    |     response = await func(*args, **kwargs)  # type: ignore
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1536, in get_sector_heatmap
+    |     for sym_info in symbols_data:
+    | TypeError: 'coroutine' object is not iterable
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response_sent.set()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    return await call_next(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1536, in get_sector_heatmap
+    for sym_info in symbols_data:
+TypeError: 'coroutine' object is not iterable
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/pandas/core/flags.py:52: RuntimeWarning: coroutine 'get_nifty50_symbols' was never awaited
+  self._allows_duplicate_labels = allows_duplicate_labels
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+2026-02-24 15:39:04,830 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:62638 - "GET /api/market/morning-brief HTTP/1.1" 200 OK
+/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/numpy/_core/_ufunc_config.py:424: RuntimeWarning: coroutine 'get_nifty50_symbols' was never awaited
+  self._token = _extobj_contextvar.set(extobj)
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+INFO:     127.0.0.1:62755 - "OPTIONS /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62756 - "OPTIONS /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62756 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62755 - "GET /api/settings/api-keys HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62859 - "OPTIONS /api/stocks/NTPC.NS/quote HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62860 - "OPTIONS /api/stocks/NTPC.NS/technicals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62862 - "OPTIONS /api/watchlist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62859 - "OPTIONS /api/stocks/NTPC.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62862 - "GET /api/stocks/NTPC.NS/technicals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62860 - "GET /api/stocks/NTPC.NS/quote HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62864 - "GET /api/stocks/NTPC.NS/history?period=1mo&interval=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62859 - "GET /api/watchlist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62859 - "OPTIONS /api/stocks/NTPC.NS/fundamentals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62864 - "OPTIONS /api/stocks/NTPC.NS/news?limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62860 - "OPTIONS /api/stocks/NTPC.NS/earnings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62862 - "OPTIONS /api/options/NTPC.NS/chain HTTP/1.1" 200 OK
+2026-02-24 15:41:12,171 - server - ERROR - Error fetching earnings for NTPC.NS: Missing optional dependency 'lxml'.  Use pip or conda to install lxml.
+INFO:     127.0.0.1:62860 - "GET /api/stocks/NTPC.NS/earnings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62864 - "GET /api/stocks/NTPC.NS/fundamentals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62862 - "GET /api/stocks/NTPC.NS/news?limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62859 - "GET /api/options/NTPC.NS/chain HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62859 - "OPTIONS /api/stocks/NTPC.NS/ai-analysis HTTP/1.1" 200 OK
+2026-02-24 15:41:31,646 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:62859 - "POST /api/stocks/NTPC.NS/ai-analysis HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62984 - "OPTIONS /api/ai/auto-recommendations HTTP/1.1" 200 OK
+2026-02-24 15:42:25,757 - yfinance - ERROR - $TATAMOTORS.NS: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+INFO:     127.0.0.1:62984 - "GET /api/ai/auto-recommendations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62984 - "OPTIONS /api/market/breakouts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62984 - "GET /api/market/breakouts HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+  |     response_sent.set()
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  | exceptiongroup.ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    |     return await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response_sent.set()
+    |   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    |     self.gen.throw(type, value, traceback)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    |     return await call_next(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    |     response = await func(*args, **kwargs)  # type: ignore
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1492, in get_breakouts
+    |     for sym_info in symbols_data:
+    | TypeError: 'coroutine' object is not iterable
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response_sent.set()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    return await call_next(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1492, in get_breakouts
+    for sym_info in symbols_data:
+TypeError: 'coroutine' object is not iterable
+INFO:     127.0.0.1:62996 - "GET /api/market/breakouts HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+  |     response_sent.set()
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  | exceptiongroup.ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    |     return await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response_sent.set()
+    |   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    |     self.gen.throw(type, value, traceback)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    |     return await call_next(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    |     response = await func(*args, **kwargs)  # type: ignore
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1492, in get_breakouts
+    |     for sym_info in symbols_data:
+    | TypeError: 'coroutine' object is not iterable
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response_sent.set()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    return await call_next(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1492, in get_breakouts
+    for sym_info in symbols_data:
+TypeError: 'coroutine' object is not iterable
+INFO:     127.0.0.1:63000 - "GET /api/market/breakouts HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+  |     yield
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+  |     response_sent.set()
+  |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 783, in __aexit__
+  |     raise BaseExceptionGroup(
+  | exceptiongroup.ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    |     return await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response_sent.set()
+    |   File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    |     self.gen.throw(type, value, traceback)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    |     return await call_next(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    |     response = await func(request)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    |     raw_response = await run_endpoint_function(
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    |     response = await func(*args, **kwargs)  # type: ignore
+    |   File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1492, in get_breakouts
+    |     for sym_info in symbols_data:
+    | TypeError: 'coroutine' object is not iterable
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 408, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 84, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response_sent.set()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/middleware.py", line 128, in dispatch
+    return await call_next(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/.venv/lib/python3.9/site-packages/slowapi/extension.py", line 734, in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+  File "/Users/sharajrewoo/DemoReposQA/FinSight/backend/server.py", line 1492, in get_breakouts
+    for sym_info in symbols_data:
+TypeError: 'coroutine' object is not iterable
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/logging/__init__.py:1777: RuntimeWarning: coroutine 'get_nifty50_symbols' was never awaited
+  self.logger = logger
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
