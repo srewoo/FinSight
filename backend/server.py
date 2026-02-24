@@ -84,6 +84,52 @@ def validate_chart_image(image_base64: str) -> str:
         raise HTTPException(status_code=400, detail="Invalid base64 image data")
     return img_data
 
+
+# ---------------------------------------------------------------------------
+# Simple JWT Auth Endpoints
+# ---------------------------------------------------------------------------
+from fastapi.security import OAuth2PasswordRequestForm
+from auth import verify_password, get_password_hash, create_access_token
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    name: Optional[str] = "User"
+
+@api_router.post("/auth/token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Authenticate a user and return a JWT access token."""
+    user_dict = await db.users.find_one({"email": form_data.username})
+    if not user_dict or not user_dict.get("hashed_password"):
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        
+    if not verify_password(form_data.password, user_dict["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        
+    access_token = create_access_token(
+        data={"sub": str(user_dict.get("firebase_uid", user_dict.get("_id"))), "email": user_dict["email"], "name": user_dict.get("name", "User")}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@api_router.post("/admin/provision-user")
+async def admin_provision_user(user: UserCreate):
+    """Utility endpoint to instantly create an account with a password for testing."""
+    existing = await db.users.find_one({"email": user.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+        
+    hashed_password = get_password_hash(user.password)
+    user_doc = {
+        "email": user.email,
+        "name": user.name,
+        "hashed_password": hashed_password,
+        "firebase_uid": str(uuid.uuid4()), # We use a random UUID to replace Firebase UID
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(user_doc)
+    return {"message": "User provisioned successfully. You can now login via /auth/token.", "email": user.email}
+
 # --- Pydantic Models ---
 class WatchlistItem(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

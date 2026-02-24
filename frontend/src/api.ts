@@ -11,10 +11,47 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+export const setToken = async (value: string) => {
+  if (Platform.OS === 'web') {
+    localStorage.setItem('userToken', value);
+  } else {
+    await SecureStore.setItemAsync('userToken', value);
+  }
+};
+
+export const getToken = async () => {
+  if (Platform.OS === 'web') {
+    return localStorage.getItem('userToken');
+  } else {
+    return await SecureStore.getItemAsync('userToken');
+  }
+};
+
+export const removeToken = async () => {
+  if (Platform.OS === 'web') {
+    localStorage.removeItem('userToken');
+  } else {
+    await SecureStore.deleteItemAsync('userToken');
+  }
+};
+
 async function request(endpoint: string, options?: RequestInit, retries = MAX_RETRIES): Promise<any> {
   const url = `${API_BASE}${endpoint}`;
+
+  // Try to attach token automatically
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (e) {
+    // Ignore secure store errors
+  }
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options?.headers as Record<string, string> || {}),
   };
 
@@ -129,6 +166,11 @@ export const api = {
     request('/settings/api-keys', { method: 'POST', body: JSON.stringify(data) }),
 
   // ── User / Auth ───────────────────────────────────────────────────────────
+  login: (data: URLSearchParams) => request('/auth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: data.toString()
+  }),
   getUserProfile: () => request('/user/profile'),
   acceptDisclaimer: (version: string) =>
     request('/user/accept-disclaimer', { method: 'POST', body: JSON.stringify({ version }) }),

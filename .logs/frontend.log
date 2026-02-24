@@ -12,23 +12,16 @@ Your project may not work correctly until you install the expected versions of t
 Waiting on http://localhost:8082
 Logs for your project will appear below.
 Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 37.9% (263/427)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓░░░░░░░░░░ 37.7% (285/464)
-Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 87.7% (753/804)
-λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 88.1% (734/784)
-λ Bundled 8716ms node_modules/expo-router/node/render.js (919 modules)
-λ Bundled 1053ms node_modules/expo-router/node/render.js (1 module)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 44.6% (364/545)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 57.6% (418/551)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.8% (959/965)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 95.8% (879/898)
+λ Bundled 7203ms node_modules/expo-router/node/render.js (898 modules)
 "shadow*" style props are deprecated. Use "boxShadow".
+Web Bundled 8123ms node_modules/expo-router/entry.js (968 modules)
+λ Bundled 46ms node_modules/expo-router/node/render.js (1 module)
 "shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 10010ms node_modules/expo-router/entry.js (960 modules)
-Error: Premature close
-    at onclose (node:internal/streams/end-of-stream:159:30)
-    at processTicksAndRejections (node:internal/process/task_queues:77:11)
-Web Bundled 2302ms node_modules/expo-router/entry.js (1 module)
-Web node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 22.9% ( 97/266)
-λ Bundled 19ms node_modules/expo-router/node/render.js (1 module)
-"shadow*" style props are deprecated. Use "boxShadow".
-Web Bundled 395ms node_modules/expo-router/entry.js (1 module)
-Web Bundled 3805ms node_modules/expo-router/entry.js (965 modules)
-Web Bundled 1767ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 604ms node_modules/expo-router/entry.js (1 module)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 45.8% (408/603)
+Web Bundled 4053ms node_modules/expo-router/entry.js (969 modules)
  LOG  [web] Logs will appear in the browser console

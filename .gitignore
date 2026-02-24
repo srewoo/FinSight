@@ -19,6 +19,7 @@ node_modules/
 # Testing
 /coverage
 backend/.env
+README.md
 
 # Next.js
 /.next/
