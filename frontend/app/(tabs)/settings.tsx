@@ -23,7 +23,8 @@ const PROVIDERS = [
     accent: '#10A37F',
     keyPlaceholder: 'sk-...',
     models: [
-      { id: 'gpt-5-mini', label: 'GPT-5 Mini', badge: 'Latest' },
+      { id: 'gpt-4o-mini', label: 'GPT-4o Mini', badge: 'Fast & Cheap' },
+      { id: 'gpt-4o', label: 'GPT-4o', badge: 'Most Capable' },
     ],
   },
   {
@@ -33,7 +34,8 @@ const PROVIDERS = [
     accent: '#4285F4',
     keyPlaceholder: 'AIza...',
     models: [
-      { id: 'gemini-3.0', label: 'Gemini 3.0', badge: 'Latest' },
+      { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', badge: 'Latest' },
+      { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', badge: 'Powerful' },
     ],
   },
   {
@@ -43,8 +45,8 @@ const PROVIDERS = [
     accent: '#D97706',
     keyPlaceholder: 'sk-ant-...',
     models: [
-      { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', badge: 'Balanced' },
-      { id: 'claude-opus-4-5', label: 'Claude Opus 4.5', badge: 'Most Capable' },
+      { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', badge: 'Balanced' },
+      { id: 'claude-3-opus-20240229', label: 'Claude 3 Opus', badge: 'Most Capable' },
     ],
   },
 ];
@@ -63,7 +65,7 @@ interface ApiKeyMasked {
 
 export default function SettingsScreen() {
   const [selectedProvider, setSelectedProvider] = useState<string>('openai');
-  const [selectedModel, setSelectedModel] = useState<string>('gpt-5-mini');
+  const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 

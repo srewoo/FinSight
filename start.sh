@@ -49,6 +49,8 @@ if [ ! -d ".venv" ] || [ ! -f "$VENV_PYTHON" ] || ! "$VENV_PYTHON" -c "import sy
 fi
 
 source .venv/bin/activate
+# Upgrade pip first so it can resolve binary wheels (avoids slow source compilation)
+.venv/bin/pip install -q --upgrade pip
 .venv/bin/pip install -q -r requirements.txt
 
 # Kill any process on port 8001

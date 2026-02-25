@@ -92,8 +92,3 @@ android-sdk/
 frontend/android/
 .logs/
 backend/.venv/
-*.apk
-*.aab
-frontend/android/
-.logs/
-backend/.venv/

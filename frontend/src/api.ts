@@ -136,10 +136,17 @@ export const api = {
     request(`/options/${encodeURIComponent(symbol)}/greeks?strike=${strike}&option_type=${optionType}&expiry=${encodeURIComponent(expiry)}`),
 
   // ── Alerts ─────────────────────────────────────────────────────────────────
-  getAlerts: () => request('/alerts'),
-  createAlert: (data: { symbol: string, target_price: number, condition: string, notes?: string }) => request('/alerts', { method: 'POST', body: JSON.stringify(data) }),
+  getAlerts: (active_only = true) => request(`/alerts?active_only=${active_only}`),
+  createAlert: (data: { symbol: string, target_price: number, condition: string, note?: string }) => request('/alerts', { method: 'POST', body: JSON.stringify(data) }),
   deleteAlert: (id: string) => request(`/alerts/${id}`, { method: 'DELETE' }),
-  evaluateAlerts: () => request('/alerts/evaluate'),
+  getTriggeredAlerts: () => request('/alerts/triggered'),
+  markAlertRead: (id: string) => request(`/alerts/${id}/read`, { method: 'POST' }),
+
+  // ── News & Sentiment ──────────────────────────────────────────────────────
+  getMarketNews: (limit = 20) => request(`/news/market?limit=${limit}`),
+  getStockNews: (symbol: string, limit = 10) =>
+    request(`/news/${encodeURIComponent(symbol)}?limit=${limit}`),
+  getSentimentSummary: () => request('/sentiment/summary'),
 
   // ── Broker ────────────────────────────────────────────────────────────────
   brokerConnect: (data: { provider?: string; api_key: string; client_id: string; pin: string; totp_secret: string }) =>
@@ -164,6 +171,25 @@ export const api = {
   getApiKeys: () => request('/settings/api-keys'),
   saveApiKeys: (data: { openai_key?: string; gemini_key?: string; claude_key?: string }) =>
     request('/settings/api-keys', { method: 'POST', body: JSON.stringify(data) }),
+
+  // ── Extended API Keys (FMP, Zerodha, Groww, Firebase) ───────────────────
+  getExtendedApiKeys: () => request('/settings/extended-api-keys'),
+  saveExtendedApiKeys: (data: {
+    fmp_key?: string;
+    zerodha_api_key?: string;
+    zerodha_access_token?: string;
+    groww_api_key?: string;
+    firebase_device_token?: string;
+    device_platform?: string;
+  }) => request('/settings/extended-api-keys', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  validateApiKey: (service: string, apiKey: string) =>
+    request(`/settings/validate-api-key?service=${service}`, {
+      method: 'POST',
+      body: JSON.stringify({ api_key: apiKey })
+    }),
 
   // ── User / Auth ───────────────────────────────────────────────────────────
   login: (data: URLSearchParams) => request('/auth/token', {

@@ -59,3 +59,23 @@ pytest-asyncio>=0.21.0
 scipy>=1.10.0
 pyotp>=2.9.0
 
+# Caching
+redis>=5.0.0
+
+# WebSockets (included with FastAPI/uvicorn)
+websockets>=12.0
+
+# HTML Parsing for sentiment analysis
+beautifulsoup4>=4.12.0
+# lxml is optional — BeautifulSoup falls back to html.parser automatically
+# Install manually if you need faster HTML parsing: pip install lxml
+
+# Background tasks
+apscheduler>=3.10.0
+
+# Optional data source fallbacks (gracefully skipped if unavailable)
+# tvDatafeed is NOT on PyPI — install manually if needed:
+#   pip install git+https://github.com/rongardF/tvdatafeed.git
+# jugaad-data has conflicting beautifulsoup4 deps — install manually if needed:
+#   pip install "jugaad-data>=0.27.0" "beautifulsoup4==4.9.3"
+

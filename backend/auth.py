@@ -1,5 +1,6 @@
 import os
 import logging
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Any
 from fastapi import Depends, HTTPException, status
@@ -10,10 +11,28 @@ from passlib.context import CryptContext
 # Set up logging and config
 logger = logging.getLogger(__name__)
 
+def _generate_secure_secret() -> str:
+    """Generate a cryptographically secure random secret key."""
+    return secrets.token_urlsafe(32)
+
 # Config
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "change-this-in-production-long-random-string")
+# Generate a secure random key if not provided (per-session only, not persisted)
+# For production, ALWAYS set JWT_SECRET_KEY in environment
+_env_secret = os.environ.get("JWT_SECRET_KEY")
+if _env_secret:
+    SECRET_KEY = _env_secret
+else:
+    # Generate a random key for this session only
+    # WARNING: Tokens will invalidate on restart without persistent SECRET_KEY
+    SECRET_KEY = _generate_secure_secret()
+    logger.warning(
+        "JWT_SECRET_KEY not set! Using temporary random key. "
+        "Tokens will be invalidated on restart. "
+        "Set JWT_SECRET_KEY in environment for production."
+    )
+
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 SECURITY_DISABLED = os.environ.get("DISABLE_AUTH", "false").lower() == "true"
 
 # Security utilities

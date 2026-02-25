@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Query, Depends, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Query, Depends, Request, WebSocket, WebSocketDisconnect
+from fastapi.websockets import WebSocketState
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,12 +10,31 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import json
 import re
+import asyncio
+
+try:
+    from tvDatafeed import TvDatafeed, Interval
+    tv = TvDatafeed()
+except Exception:
+    tv = None
+    Interval = None
+
+try:
+    from jugaad_data.nse import stock_df
+except ImportError:
+    stock_df = None
+from datetime import date, timedelta as date_timedelta
+import threading
+import time
+
+tv_lock = threading.Lock()
+jugaad_lock = threading.Lock()
 
 from math_utils import compute_fibonacci_levels, compute_volume_profile_poc
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -25,6 +45,10 @@ from slowapi.middleware import SlowAPIMiddleware
 from llm_client import call_llm, SUPPORTED_MODELS
 from auth import init_firebase, get_current_user, get_optional_user, AuthenticatedUser
 from disclaimer import build_disclaimer_response_field, SEBI_DISCLAIMER_TEXT, SEBI_DISCLAIMER_SHORT, CURRENT_DISCLAIMER_VERSION
+from cache import cache_manager, cached, make_cache_key
+from alerts import init_alerts, alerts_manager, AlertCreate, AlertsManager
+from sentiment import get_market_news, get_stock_news, get_sentiment_summary
+from websocket_handler import ws_manager
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -34,11 +58,62 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-app = FastAPI()
+# ---------------------------------------------------------------------------
+# Startup/Shutdown Events
+# ---------------------------------------------------------------------------
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize and cleanup resources on app startup/shutdown."""
+    # Startup
+    logger.info("Starting up FinSight backend...")
+
+    # Connect to Redis cache (optional - works without Redis)
+    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
+    cache_manager.redis_url = redis_url
+    redis_connected = await cache_manager.connect()
+    if not redis_connected:
+        logger.warning("Redis not available. Running without caching.")
+
+    # Start WebSocket price updates
+    await ws_manager.start_price_updates(interval=2.0)
+
+    # Initialize FCM if configured (optional)
+    try:
+        from fcm import init_fcm
+        fcm_available = init_fcm()
+        if alerts_manager:
+            alerts_manager.set_fcm_available(fcm_available)
+    except Exception as e:
+        logger.warning(f"FCM initialization failed: {e}. Push notifications disabled.")
+        if alerts_manager:
+            alerts_manager.set_fcm_available(False)
+
+    logger.info("Startup complete. Cache and WebSocket services initialized.")
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down FinSight backend...")
+    await cache_manager.disconnect()
+    await ws_manager.stop_price_updates()
+    client.close()
+    logger.info("Shutdown complete.")
+
+app = FastAPI(lifespan=lifespan)
 api_router = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Initialize alerts manager (must be after db and logger are ready)
+init_alerts(db)
+
+if tv is None:
+    logger.warning("tvDatafeed not available. Will use yfinance only for price data.")
+if stock_df is None:
+    logger.warning("jugaad_data not available. NSE scraping fallback disabled.")
 
 # --- Rate Limiting ---
 def get_rate_limit_key(request: Request) -> str:
@@ -112,8 +187,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @api_router.post("/admin/provision-user")
-async def admin_provision_user(user: UserCreate):
-    """Utility endpoint to instantly create an account with a password for testing."""
+async def admin_provision_user(user: UserCreate, request: Request):
+    """Utility endpoint to create an account. Requires X-Admin-Secret header matching ADMIN_SECRET env var."""
+    admin_secret = os.environ.get("ADMIN_SECRET", "")
+    provided = request.headers.get("X-Admin-Secret", "")
+    if not admin_secret or provided != admin_secret:
+        raise HTTPException(status_code=403, detail="Forbidden: invalid or missing admin secret.")
     existing = await db.users.find_one({"email": user.email})
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
@@ -180,6 +259,15 @@ class ApiKeysUpdate(BaseModel):
 class DisclaimerAcceptRequest(BaseModel):
     version: str = "1.0"
 
+class UserAPIKeysUpdate(BaseModel):
+    """User-configurable API keys for external services."""
+    fmp_key: Optional[str] = None  # Financial Modeling Prep
+    zerodha_api_key: Optional[str] = None
+    zerodha_access_token: Optional[str] = None
+    groww_api_key: Optional[str] = None
+    firebase_device_token: Optional[str] = None
+    device_platform: Optional[str] = None  # "ios" or "android"
+
 # --- LLM Configuration (user keys take priority over env keys) ---
 def _mask_key(key: str) -> str:
     """Return last 4 chars masked as ****xxxx, or empty string."""
@@ -193,7 +281,7 @@ def _safe_decrypt(ciphertext: str) -> str:
         return ""
     try:
         from cryptography.fernet import Fernet, InvalidToken
-        key = os.environ.get("FERNET_KEY", "")
+        key = os.environ.get("FERNET_KEY") or os.environ.get("FERNET_ENCRYPTION_KEY", "")
         if not key:
             return ""
         f = Fernet(key.encode() if isinstance(key, str) else key)
@@ -248,9 +336,9 @@ def get_llm_config(preferred_provider: str = None, preferred_model: str = None, 
 
     # Resolve model: user preference → env default → first supported model
     env_model_map = {
-        "openai": os.environ.get("OPENAI_MODEL", "gpt-5-mini"),
-        "gemini": os.environ.get("GEMINI_MODEL", "gemini-3.0"),
-        "claude": os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6"),
+        "openai": os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
+        "gemini": os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+        "claude": os.environ.get("CLAUDE_MODEL", "claude-3-5-sonnet-20241022"),
     }
     model = preferred_model or env_model_map.get(provider, SUPPORTED_MODELS[provider][0])
     # Guard: ensure model belongs to resolved provider
@@ -348,8 +436,189 @@ async def get_nifty50_symbols() -> List[Dict]:
         {"symbol": "HINDALCO", "name": "Hindalco Industries", "sector": "Metals"},
         {"symbol": "BPCL", "name": "Bharat Petroleum", "sector": "Energy"},
         {"symbol": "UPL", "name": "UPL Limited", "sector": "Chemicals"},
+        {"symbol": "ZOMATO", "name": "Zomato", "sector": "Consumer"},
+        {"symbol": "TRENT", "name": "Trent", "sector": "Consumer"},
+        {"symbol": "BEL", "name": "Bharat Electronics", "sector": "Defense"},
+        {"symbol": "HAL", "name": "Hindustan Aeronautics", "sector": "Defense"},
+        {"symbol": "CHOLAFIN", "name": "Cholamandalam Investment", "sector": "Finance"},
+        {"symbol": "TVSMOTOR", "name": "TVS Motor", "sector": "Auto"},
+        {"symbol": "BOSCHLTD", "name": "Bosch", "sector": "Auto"},
+        {"symbol": "SRF", "name": "SRF Limited", "sector": "Chemicals"},
+        {"symbol": "SIEMENS", "name": "Siemens", "sector": "Engineering"},
+        {"symbol": "PIDILITIND", "name": "Pidilite Industries", "sector": "Chemicals"},
+        {"symbol": "HAVELLS", "name": "Havells India", "sector": "Consumer"},
+        {"symbol": "CUMMINSIND", "name": "Cummins India", "sector": "Engineering"},
+        {"symbol": "INDIGO", "name": "InterGlobe Aviation", "sector": "Aviation"},
+        {"symbol": "GAIL", "name": "GAIL India", "sector": "Energy"},
+        {"symbol": "AMBUJACEM", "name": "Ambuja Cements", "sector": "Cement"},
+        {"symbol": "ABB", "name": "ABB India", "sector": "Engineering"},
+        {"symbol": "IOC", "name": "Indian Oil Corporation", "sector": "Energy"},
+        {"symbol": "ADANIPOWER", "name": "Adani Power", "sector": "Power"},
+        {"symbol": "DLF", "name": "DLF Limited", "sector": "Real Estate"},
+        {"symbol": "BANKBARODA", "name": "Bank of Baroda", "sector": "Banking"},
+        {"symbol": "PNB", "name": "Punjab National Bank", "sector": "Banking"},
+        {"symbol": "TORNTPHARM", "name": "Torrent Pharmaceuticals", "sector": "Pharma"},
+        {"symbol": "JINDALSTEL", "name": "Jindal Steel & Power", "sector": "Metals"},
+        {"symbol": "GODREJCP", "name": "Godrej Consumer Products", "sector": "FMCG"},
+        {"symbol": "SHREECEM", "name": "Shree Cement", "sector": "Cement"},
+        {"symbol": "VEDL", "name": "Vedanta", "sector": "Metals"},
+        {"symbol": "MUTHOOTFIN", "name": "Muthoot Finance", "sector": "Finance"},
+        {"symbol": "COLPAL", "name": "Colgate-Palmolive", "sector": "FMCG"},
+        {"symbol": "ICICIGI", "name": "ICICI Lombard", "sector": "Insurance"},
+        {"symbol": "ICICIPRULI", "name": "ICICI Prudential", "sector": "Insurance"},
+        {"symbol": "HDFCAMC", "name": "HDFC AMC", "sector": "Finance"},
+        {"symbol": "BERGEPAINT", "name": "Berger Paints", "sector": "Consumer"},
+        {"symbol": "MARICO", "name": "Marico", "sector": "FMCG"},
+        {"symbol": "DABUR", "name": "Dabur India", "sector": "FMCG"},
+        {"symbol": "LUPIN", "name": "Lupin", "sector": "Pharma"},
+        {"symbol": "AUROPHARMA", "name": "Aurobindo Pharma", "sector": "Pharma"},
+        {"symbol": "BIOCON", "name": "Biocon", "sector": "Pharma"},
+        {"symbol": "MOTHERSON", "name": "Samvardhana Motherson", "sector": "Auto"},
+        {"symbol": "TATACHEM", "name": "Tata Chemicals", "sector": "Chemicals"},
+        {"symbol": "VOLTAS", "name": "Voltas", "sector": "Consumer"},
+        {"symbol": "PAGEIND", "name": "Page Industries", "sector": "Consumer"},
+        {"symbol": "BATAINDIA", "name": "Bata India", "sector": "Consumer"},
+        {"symbol": "ASHOKLEY", "name": "Ashok Leyland", "sector": "Auto"},
+        {"symbol": "NMDC", "name": "NMDC", "sector": "Mining"},
+        {"symbol": "SAIL", "name": "Steel Authority of India", "sector": "Metals"},
+        {"symbol": "BHEL", "name": "Bharat Heavy Electricals", "sector": "Engineering"},
+        {"symbol": "COROMANDEL", "name": "Coromandel International", "sector": "Chemicals"},
+        {"symbol": "JUBLFOOD", "name": "Jubilant FoodWorks", "sector": "Consumer"},
+        {"symbol": "MRF", "name": "MRF Limited", "sector": "Auto"},
+        {"symbol": "ZOMATO", "name": "Zomato", "sector": "Consumer"},
+        {"symbol": "TRENT", "name": "Trent", "sector": "Consumer"},
+        {"symbol": "BEL", "name": "Bharat Electronics", "sector": "Defense"},
+        {"symbol": "HAL", "name": "Hindustan Aeronautics", "sector": "Defense"},
+        {"symbol": "CHOLAFIN", "name": "Cholamandalam Investment", "sector": "Finance"},
+        {"symbol": "TVSMOTOR", "name": "TVS Motor", "sector": "Auto"},
+        {"symbol": "BOSCHLTD", "name": "Bosch", "sector": "Auto"},
+        {"symbol": "SRF", "name": "SRF Limited", "sector": "Chemicals"},
+        {"symbol": "SIEMENS", "name": "Siemens", "sector": "Engineering"},
+        {"symbol": "PIDILITIND", "name": "Pidilite Industries", "sector": "Chemicals"},
+        {"symbol": "HAVELLS", "name": "Havells India", "sector": "Consumer"},
+        {"symbol": "CUMMINSIND", "name": "Cummins India", "sector": "Engineering"},
+        {"symbol": "INDIGO", "name": "InterGlobe Aviation", "sector": "Aviation"},
+        {"symbol": "GAIL", "name": "GAIL India", "sector": "Energy"},
+        {"symbol": "AMBUJACEM", "name": "Ambuja Cements", "sector": "Cement"},
+        {"symbol": "ABB", "name": "ABB India", "sector": "Engineering"},
+        {"symbol": "IOC", "name": "Indian Oil Corporation", "sector": "Energy"},
+        {"symbol": "ADANIPOWER", "name": "Adani Power", "sector": "Power"},
+        {"symbol": "DLF", "name": "DLF Limited", "sector": "Real Estate"},
+        {"symbol": "BANKBARODA", "name": "Bank of Baroda", "sector": "Banking"},
+        {"symbol": "PNB", "name": "Punjab National Bank", "sector": "Banking"},
+        {"symbol": "TORNTPHARM", "name": "Torrent Pharmaceuticals", "sector": "Pharma"},
+        {"symbol": "JINDALSTEL", "name": "Jindal Steel & Power", "sector": "Metals"},
+        {"symbol": "GODREJCP", "name": "Godrej Consumer Products", "sector": "FMCG"},
+        {"symbol": "SHREECEM", "name": "Shree Cement", "sector": "Cement"},
+        {"symbol": "VEDL", "name": "Vedanta", "sector": "Metals"},
+        {"symbol": "MUTHOOTFIN", "name": "Muthoot Finance", "sector": "Finance"},
+        {"symbol": "COLPAL", "name": "Colgate-Palmolive", "sector": "FMCG"},
+        {"symbol": "ICICIGI", "name": "ICICI Lombard", "sector": "Insurance"},
+        {"symbol": "ICICIPRULI", "name": "ICICI Prudential", "sector": "Insurance"},
+        {"symbol": "HDFCAMC", "name": "HDFC AMC", "sector": "Finance"},
+        {"symbol": "BERGEPAINT", "name": "Berger Paints", "sector": "Consumer"},
+        {"symbol": "MARICO", "name": "Marico", "sector": "FMCG"},
+        {"symbol": "DABUR", "name": "Dabur India", "sector": "FMCG"},
+        {"symbol": "LUPIN", "name": "Lupin", "sector": "Pharma"},
+        {"symbol": "AUROPHARMA", "name": "Aurobindo Pharma", "sector": "Pharma"},
+        {"symbol": "BIOCON", "name": "Biocon", "sector": "Pharma"},
+        {"symbol": "MOTHERSON", "name": "Samvardhana Motherson", "sector": "Auto"},
+        {"symbol": "TATACHEM", "name": "Tata Chemicals", "sector": "Chemicals"},
+        {"symbol": "VOLTAS", "name": "Voltas", "sector": "Consumer"},
+        {"symbol": "PAGEIND", "name": "Page Industries", "sector": "Consumer"},
+        {"symbol": "BATAINDIA", "name": "Bata India", "sector": "Consumer"},
+        {"symbol": "ASHOKLEY", "name": "Ashok Leyland", "sector": "Auto"},
+        {"symbol": "MRF", "name": "MRF Limited", "sector": "Auto"}
     ]
     return major_stocks
+
+def resilient_fetch_history(symbol: str, period: str = "6mo", interval: str = "1d") -> pd.DataFrame:
+    """
+    Attempts to fetch data from yfinance first. If it fails or is rate-limited
+    (returns empty DataFrame), falls back to tvDatafeed.
+    
+    symbol specifies the base ticker (e.g. RELIANCE) or full ticker (RELIANCE.NS)
+    """
+    # Clean symbol for tvDatafeed and jugaad
+    base_sym = symbol.replace('.NS', '').replace('.BO', '')
+    
+    # Format symbol for yfinance
+    if symbol.startswith('^') or symbol.endswith('.NS') or symbol.endswith('.BO') or '=' in symbol:
+        yf_sym = symbol
+    else:
+        yf_sym = f"{symbol}.NS"
+        
+    hist = pd.DataFrame()
+    
+    # Attempt 1: yfinance
+    try:
+        hist = yf.Ticker(yf_sym).history(period=period, interval=interval)
+    except Exception as e:
+        logger.warning(f"yfinance failed for {yf_sym}: {e}")
+        
+    # Attempt 2: tvDatafeed Fallback (if yf returns empty or failed)
+    if hist.empty and tv is not None and not symbol.startswith('^'):
+        with tv_lock:
+            try:
+                logger.info(f"Falling back to tvDatafeed for {symbol}")
+                # Map intervals to tvDatafeed
+                tv_interval = Interval.in_daily
+                if interval == "1wk": tv_interval = Interval.in_weekly
+                elif interval == "1mo": tv_interval = Interval.in_monthly
+                elif interval == "15m": tv_interval = Interval.in_15_minute
+                elif interval == "1h": tv_interval = Interval.in_1_hour
+                
+                # Map periods roughly to n_bars
+                n_bars = 150 # Default ~6mo daily
+                if period == "1y": n_bars = 250
+                elif period == "2y": n_bars = 500
+                elif period == "5d": n_bars = 300 if interval == "15m" else 5
+                elif period == "1mo": n_bars = 22
+                elif period == "3mo": n_bars = 65
+                
+                tv_df = tv.get_hist(symbol=base_sym, exchange='NSE', interval=tv_interval, n_bars=n_bars)
+                if tv_df is not None and not tv_df.empty:
+                    # Rename columns to match yfinance format
+                    tv_df.rename(columns={
+                        'open': 'Open', 'high': 'High', 'low': 'Low', 
+                        'close': 'Close', 'volume': 'Volume'
+                    }, inplace=True)
+                    hist = tv_df
+                time.sleep(0.5) # Slight delay to prevent websocket spam
+            except Exception as e:
+                logger.warning(f"tvDatafeed failed for {symbol}: {e}")
+            
+    # Attempt 3: jugaad-data Fallback (direct NSE scrape, daily only)
+    if hist.empty and interval == "1d" and stock_df is not None:
+        with jugaad_lock:
+            try:
+                logger.info(f"Falling back to jugaad-data for {symbol}")
+                # Map period to days
+                days_back = 180
+                if period == "1y": days_back = 365
+                elif period == "2y": days_back = 730
+                elif period == "5d": days_back = 7
+                elif period == "1mo": days_back = 30
+                elif period == "3mo": days_back = 90
+                
+                end_date = date.today()
+                start_date = end_date - timedelta(days=days_back)
+                
+                j_df = stock_df(symbol=base_sym, from_date=start_date, to_date=end_date)
+                if j_df is not None and not j_df.empty:
+                    # Format to match yfinance format
+                    j_df = j_df.sort_values(by='DATE')
+                    j_df.set_index('DATE', inplace=True)
+                    j_df.rename(columns={
+                        'OPEN': 'Open', 'HIGH': 'High', 'LOW': 'Low', 
+                        'CLOSE': 'Close', 'VOLUME': 'Volume'
+                    }, inplace=True)
+                    hist = j_df
+                time.sleep(0.5) # Delay to prevent sequential IP bans from NSE
+            except Exception as e:
+                logger.error(f"jugaad-data also failed for {symbol}: {e}")
+            
+    return hist
 
 def safe_float(val):
     if val is None or (isinstance(val, float) and (np.isnan(val) or np.isinf(val))):
@@ -644,6 +913,159 @@ async def save_api_keys(payload: ApiKeysUpdate, user: AuthenticatedUser = Depend
     return {"message": "API keys saved successfully"}
 
 # ---------------------------------------------------------------------------
+# Extended API Keys (FMP, Zerodha, Groww, Firebase)
+# ---------------------------------------------------------------------------
+
+@api_router.get("/settings/extended-api-keys")
+async def get_extended_api_keys(user: AuthenticatedUser = Depends(get_current_user)):
+    """Return masked status of extended API keys (FMP, Zerodha, Groww)."""
+    user_profile = await db.users.find_one({"firebase_uid": user.uid})
+    stored = (user_profile or {}).get("api_keys", {})
+
+    result = {
+        "fmp_configured": bool(_safe_decrypt(stored.get("fmp_enc", ""))),
+        "zerodha_configured": bool(_safe_decrypt(stored.get("zerodha_api_key_enc", ""))),
+        "groww_configured": bool(_safe_decrypt(stored.get("groww_api_key_enc", ""))),
+        "firebase_token_configured": bool(stored.get("firebase_device_token", "")),
+    }
+
+    return result
+
+@api_router.post("/settings/extended-api-keys")
+async def save_extended_api_keys(payload: UserAPIKeysUpdate, user: AuthenticatedUser = Depends(get_current_user)):
+    """Encrypt and store extended API keys (FMP, Zerodha, Groww, Firebase)."""
+    fernet_key = os.environ.get("FERNET_KEY", "")
+    if not fernet_key:
+        raise HTTPException(status_code=503, detail="Server encryption not configured. Set FERNET_KEY in backend .env.")
+
+    from cryptography.fernet import Fernet as _Fernet
+    f = _Fernet(fernet_key.encode() if isinstance(fernet_key, str) else fernet_key)
+
+    def _enc(val: Optional[str]) -> str:
+        if not val or not val.strip():
+            return ""
+        return f.encrypt(val.strip().encode()).decode()
+
+    api_keys_update: Dict[str, str] = {}
+    update_fields: Dict[str, Any] = {}
+
+    # FMP API Key
+    if payload.fmp_key is not None:
+        if payload.fmp_key.strip():
+            api_keys_update["api_keys.fmp_enc"] = _enc(payload.fmp_key)
+        else:
+            api_keys_update["api_keys.fmp_enc"] = ""
+
+    # Zerodha credentials
+    if payload.zerodha_api_key is not None:
+        if payload.zerodha_api_key.strip():
+            api_keys_update["api_keys.zerodha_api_key_enc"] = _enc(payload.zerodha_api_key)
+        else:
+            api_keys_update["api_keys.zerodha_api_key_enc"] = ""
+
+    if payload.zerodha_access_token is not None:
+        if payload.zerodha_access_token.strip():
+            api_keys_update["api_keys.zerodha_access_token_enc"] = _enc(payload.zerodha_access_token)
+        else:
+            api_keys_update["api_keys.zerodha_access_token_enc"] = ""
+
+    # Groww API Key
+    if payload.groww_api_key is not None:
+        if payload.groww_api_key.strip():
+            api_keys_update["api_keys.groww_api_key_enc"] = _enc(payload.groww_api_key)
+        else:
+            api_keys_update["api_keys.groww_api_key_enc"] = ""
+
+    # Firebase device token (not encrypted, needed for FCM)
+    if payload.firebase_device_token is not None:
+        update_fields["firebase_device_token"] = payload.firebase_device_token
+        update_fields["device_platform"] = payload.device_platform or "unknown"
+        update_fields["firebase_token_updated_at"] = datetime.now(timezone.utc).isoformat()
+
+    # Check if we have any updates
+    if not api_keys_update and not update_fields:
+        raise HTTPException(status_code=400, detail="No keys provided")
+
+    # Update API keys
+    if api_keys_update:
+        api_keys_update["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.users.update_one(
+            {"firebase_uid": user.uid},
+            {
+                "$set": api_keys_update,
+                "$setOnInsert": {
+                    "firebase_uid": user.uid,
+                    "email": user.email,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                },
+            },
+            upsert=True,
+        )
+
+    # Update Firebase token
+    if update_fields:
+        await db.users.update_one(
+            {"firebase_uid": user.uid},
+            {"$set": update_fields}
+        )
+
+    return {"message": "Extended API keys saved successfully"}
+
+@api_router.post("/settings/validate-api-key")
+async def validate_api_key(
+    service: str,
+    api_key: str,
+    user: AuthenticatedUser = Depends(get_current_user)
+):
+    """
+    Validate an API key for a specific service.
+    service: "fmp" | "zerodha" | "groww"
+    """
+    service = service.lower().strip()
+
+    try:
+        if service == "fmp":
+            # Test FMP API key
+            from fmp_data import _make_request, FMP_API_KEY
+
+            # Temporarily use provided key
+            import fmp_data
+            original_key = fmp_data.FMP_API_KEY
+            fmp_data.FMP_API_KEY = api_key
+
+            # Try a simple request
+            test_data = _make_request("quote/NSE.NS")
+
+            # Restore original
+            fmp_data.FMP_API_KEY = original_key
+
+            if test_data:
+                return {"valid": True, "message": "FMP API key is valid"}
+            else:
+                return {"valid": False, "message": "Invalid FMP API key or API error"}
+
+        elif service == "zerodha":
+            # Test Zerodha API key (would require actual Kite Connect SDK)
+            # For now, just check format
+            if len(api_key) >= 32:
+                return {"valid": True, "message": "Zerodha API key format looks valid"}
+            else:
+                return {"valid": False, "message": "Zerodha API key too short"}
+
+        elif service == "groww":
+            # Test Groww API key (would require actual Groww SDK)
+            if len(api_key) >= 16:
+                return {"valid": True, "message": "Groww API key format looks valid"}
+            else:
+                return {"valid": False, "message": "Groww API key too short"}
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown service: {service}")
+
+    except Exception as e:
+        return {"valid": False, "message": f"Validation failed: {str(e)}"}
+
+# ---------------------------------------------------------------------------
 # SEBI Disclaimer
 # ---------------------------------------------------------------------------
 @api_router.get("/disclaimer")
@@ -675,19 +1097,49 @@ async def get_user_quota(user: AuthenticatedUser = Depends(get_current_user)):
     return {"used": used, "limit": daily_limit, "remaining": max(0, daily_limit - used)}
 
 # ---------------------------------------------------------------------------
+# In-memory TTL cache for heavy market-data endpoints (no Redis required)
+# ---------------------------------------------------------------------------
+_market_cache: dict = {}
+_MARKET_CACHE_TTL = 120  # seconds — refresh every 2 minutes
+
+def _mc_get(key: str):
+    entry = _market_cache.get(key)
+    if entry and (time.time() - entry["ts"] < _MARKET_CACHE_TTL):
+        return entry["data"]
+    return None
+
+def _mc_set(key: str, data):
+    _market_cache[key] = {"data": data, "ts": time.time()}
+
+# Semaphore: cap concurrent yfinance HTTP requests to avoid rate-limiting
+_YF_SEMAPHORE = asyncio.Semaphore(10)
+
+async def _async_fetch_history(symbol: str, period: str = "5d", interval: str = "1d") -> pd.DataFrame:
+    """Fetch yfinance history for a single symbol asynchronously."""
+    async with _YF_SEMAPHORE:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: resilient_fetch_history(symbol, period=period, interval=interval),
+        )
+
+# ---------------------------------------------------------------------------
 # Market Indices
 # ---------------------------------------------------------------------------
 @api_router.get("/market/indices")
 @limiter.limit("60/minute")
 async def get_market_indices(request: Request):
+    cached = _mc_get("indices")
+    if cached:
+        return cached
     try:
         indices = {"^NSEI": "NIFTY 50", "^BSESN": "SENSEX"}
+        tasks = [_async_fetch_history(sym, period="5d") for sym in indices]
+        hists = await asyncio.gather(*tasks, return_exceptions=True)
         result = []
-        for symbol, name in indices.items():
+        for (symbol, name), hist in zip(indices.items(), hists):
             try:
-                ticker = yf.Ticker(symbol)
-                hist = ticker.history(period="5d")
-                if hist.empty:
+                if isinstance(hist, Exception) or hist.empty:
                     continue
                 current = safe_float(hist['Close'].iloc[-1])
                 prev = safe_float(hist['Close'].iloc[-2]) if len(hist) > 1 else current
@@ -696,7 +1148,9 @@ async def get_market_indices(request: Request):
                 result.append({"symbol": symbol, "name": name, "price": current, "change": change, "change_percent": change_pct})
             except Exception as e:
                 logger.error(f"Error fetching index {symbol}: {e}")
-        return {"indices": result}
+        response = {"indices": result}
+        _mc_set("indices", response)
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -704,15 +1158,23 @@ async def get_market_indices(request: Request):
 @api_router.get("/market/top-movers")
 @limiter.limit("60/minute")
 async def get_top_movers(request: Request):
+    cached = _mc_get("top_movers")
+    if cached:
+        return cached
     try:
         stocks = await get_nifty50_symbols()
+        batch = stocks[:35]
+
+        # Fetch all 35 stocks concurrently instead of sequentially
+        hists = await asyncio.gather(
+            *[_async_fetch_history(s['symbol'], period="5d") for s in batch],
+            return_exceptions=True,
+        )
+
         movers = []
-        for s in stocks[:35]:
+        for s, hist in zip(batch, hists):
             try:
-                sym = f"{s['symbol']}.NS"
-                ticker = yf.Ticker(sym)
-                hist = ticker.history(period="5d")
-                if hist.empty or len(hist) < 2:
+                if isinstance(hist, Exception) or hist.empty or len(hist) < 2:
                     continue
                 current = safe_float(hist['Close'].iloc[-1])
                 prev = safe_float(hist['Close'].iloc[-2])
@@ -720,14 +1182,23 @@ async def get_top_movers(request: Request):
                     continue
                 change = round(current - prev, 2)
                 change_pct = round((change / prev) * 100, 2)
-                movers.append({"symbol": sym, "name": s['name'], "sector": s.get('sector', ''), "price": current, "change": change, "change_percent": change_pct})
+                movers.append({
+                    "symbol": f"{s['symbol']}.NS",
+                    "name": s['name'],
+                    "sector": s.get('sector', ''),
+                    "price": current,
+                    "change": change,
+                    "change_percent": change_pct,
+                })
             except Exception:
                 continue
-        
+
         movers.sort(key=lambda x: x["change_percent"], reverse=True)
         gainers = [m for m in movers if m["change_percent"] > 0][:5]
         losers = sorted([m for m in movers if m["change_percent"] < 0], key=lambda x: x["change_percent"])[:5]
-        return {"gainers": gainers, "losers": losers}
+        result = {"gainers": gainers, "losers": losers}
+        _mc_set("top_movers", result)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -771,7 +1242,7 @@ async def get_stock_quote(request: Request, symbol: str):
     try:
         symbol = sanitize_symbol(symbol)
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1y")
+        hist = resilient_fetch_history(symbol, period="1y")
         info = ticker.info
         
         if hist.empty:
@@ -873,9 +1344,9 @@ async def get_ai_analysis(request: Request, symbol: str, body: AIAnalysisRequest
 
         ticker = yf.Ticker(symbol)
         # Fetch multiple timeframes for confluence
-        hist = ticker.history(period="1y", interval="1d")
-        hist_1wk = ticker.history(period="2y", interval="1wk")
-        hist_15m = ticker.history(period="5d", interval="15m")
+        hist = resilient_fetch_history(symbol, period="1y", interval="1d")
+        hist_1wk = resilient_fetch_history(symbol, period="2y", interval="1wk")
+        hist_15m = resilient_fetch_history(symbol, period="5d", interval="15m")
         info = ticker.info
         
         if hist.empty:
@@ -965,15 +1436,20 @@ Return ONLY valid JSON:
 async def get_auto_recommendations():
     try:
         stocks = await get_nifty50_symbols()
-        analyzed = []
         
-        for s in stocks[:40]:
+        # Async fetch and score for all 100 stocks
+        import asyncio
+        sem = asyncio.Semaphore(5)
+        async def fetch_and_analyze(s):
             try:
                 sym_nse = f"{s['symbol']}.NS"
-                ticker = yf.Ticker(sym_nse)
-                hist = ticker.history(period="6mo", interval="1d")
-                if hist.empty or len(hist) < 30:
-                    continue
+                def _fetch():
+                    return resilient_fetch_history(s['symbol'], period="6mo", interval="1d")
+                
+                async with sem:
+                    hist = await asyncio.to_thread(_fetch)
+                    
+                if hist.empty or len(hist) < 30: return None
                 
                 technicals = compute_technicals(hist)
                 sr_levels = compute_support_resistance(hist)
@@ -1009,16 +1485,21 @@ async def get_auto_recommendations():
                 signal = "BUY" if score >= 2 else ("SELL" if score <= -2 else "HOLD")
                 confidence = min(95, max(30, 50 + score * 8))
                 
-                analyzed.append({
+                return {
                     "symbol": sym_nse, "name": s['name'], "sector": s.get('sector', ''),
                     "price": current_price, "change_percent": change_pct, "signal": signal,
                     "confidence": confidence, "rsi": rsi, "adx": adx, "macd_signal": macd_signal,
                     "support_resistance": sr_levels,
-                })
+                }
             except Exception as e:
                 logger.warning(f"Skipping {s['symbol']}: {e}")
-                continue
+                return None
+
+        # Gather results concurrently
+        tasks = [fetch_and_analyze(s) for s in stocks[:100]]
+        results = await asyncio.gather(*tasks)
         
+        analyzed = [r for r in results if r is not None]
         buy_signals = sorted([a for a in analyzed if a['signal'] == 'BUY'], key=lambda x: x['confidence'], reverse=True)
         sell_signals = sorted([a for a in analyzed if a['signal'] == 'SELL'], key=lambda x: x['confidence'], reverse=True)
         hold_signals = [a for a in analyzed if a['signal'] == 'HOLD']
@@ -1053,21 +1534,64 @@ async def deep_scan_stocks(request: Request, user: AuthenticatedUser = Depends(g
         preferred_model = user_profile.get("preferred_model") if user_profile else None
         settings = get_llm_config(preferred_provider, preferred_model, user_profile)
         stocks = await get_nifty50_symbols()
-        batch_data = []
         
-        for s in stocks[:25]:
+        # Pre-Screener Pipeline: Async Batch Fetch all 100 stocks
+        import asyncio
+        sem = asyncio.Semaphore(5)
+        async def fetch_stock_data(s):
             try:
                 sym = f"{s['symbol']}.NS"
-                ticker = yf.Ticker(sym)
-                hist = ticker.history(period="6mo", interval="1d")
-                if hist.empty or len(hist) < 30:
-                    continue
+                def _fetch():
+                    return resilient_fetch_history(s['symbol'], period="6mo", interval="1d")
+                
+                async with sem:
+                    hist = await asyncio.to_thread(_fetch)
+                    
+                if hist.empty or len(hist) < 30: return None
+                return (s, hist)
+            except Exception:
+                return None
+                
+        # Send concurrent fetch requests
+        tasks = [fetch_stock_data(s) for s in stocks[:100]]
+        results = await asyncio.gather(*tasks)
+        
+        scored_stocks = []
+        for res in results:
+            if not res: continue
+            s, hist = res
+            try:
                 technicals = compute_technicals(hist)
                 sr = compute_support_resistance(hist)
                 current = safe_float(hist['Close'].iloc[-1])
-                batch_data.append(f"{s['symbol']}: Price=₹{current}, RSI={technicals.get('rsi')}, MACD={technicals.get('macd',{}).get('signal')}, ADX={technicals.get('adx')}, BB={technicals.get('bollinger_bands',{}).get('signal')}, R1={sr.get('resistance',{}).get('r1')}, S1={sr.get('support',{}).get('s1')}")
+                
+                rsi = technicals.get('rsi')
+                macd_signal = technicals.get('macd', {}).get('signal', 'Neutral')
+                bb_signal = technicals.get('bollinger_bands', {}).get('signal', 'Normal')
+                adx = technicals.get('adx')
+                
+                # Volatility and signal scoring logic for filtering
+                score = 0
+                if rsi:
+                    if rsi <= 35 or rsi >= 65: score += 3 # Very actionable signal zone
+                    elif rsi <= 45 or rsi >= 55: score += 1
+                if macd_signal in ['Bullish', 'Bearish']: score += 2
+                if bb_signal in ['Oversold', 'Overbought']: score += 2
+                if adx and adx > 25: score += 1
+                
+                data_string = f"{s['symbol']}: Price=₹{current}, RSI={rsi}, MACD={macd_signal}, ADX={adx}, BB={bb_signal}, R1={sr.get('resistance',{}).get('r1')}, S1={sr.get('support',{}).get('s1')}"
+                
+                scored_stocks.append({
+                    "score": score,
+                    "data_string": data_string
+                })
             except Exception:
                 continue
+                
+        # Filter down to the Top 45-50 most interesting stocks based on volatility score
+        scored_stocks.sort(key=lambda x: x['score'], reverse=True)
+        top_candidates = scored_stocks[:45]
+        batch_data = [x['data_string'] for x in top_candidates]
         
         if not batch_data:
             return {"buy": [], "sell": [], "summary": "No data available"}
@@ -1080,7 +1604,7 @@ STOCK DATA:
 Return ONLY valid JSON:
 {{"buy":[{{"symbol":"SYMBOL.NS","reason":"brief reason","confidence":70}}],"sell":[{{"symbol":"SYMBOL.NS","reason":"brief reason","confidence":70}}],"market_outlook":"1 sentence overall"}}
 
-Include only stocks with strong signals (confidence > 60). Max 8 buy and 8 sell recommendations."""
+Include only stocks with strong signals (confidence > 60). Max 10 buy and 10 sell recommendations."""
 
         response = await call_llm(
             provider=settings["provider"],
@@ -1531,15 +2055,14 @@ def detect_breakout(df: "pd.DataFrame", sr: dict, technicals: dict) -> Optional[
 @limiter.limit("10/minute")
 async def get_breakouts(request: Request):
     """Scan NIFTY stocks for technical breakout signals."""
-    symbols_data = get_nifty50_symbols()
+    symbols_data = await get_nifty50_symbols()
     breakouts = []
     scanned = 0
 
     for sym_info in symbols_data:
-        sym = sym_info["symbol"]
+        sym = sym_info['symbol']
         try:
-            ticker = yf.Ticker(sym)
-            df = ticker.history(period="6mo", interval="1d")
+            df = resilient_fetch_history(sym, period="6mo", interval="1d")
             if df.empty or len(df) < 20:
                 continue
             df.index = pd.to_datetime(df.index)
@@ -1576,15 +2099,24 @@ async def get_breakouts(request: Request):
 @limiter.limit("30/minute")
 async def get_sector_heatmap(request: Request):
     """Return sector performance using 5-day price change for NIFTY stocks."""
-    symbols_data = get_nifty50_symbols()
-    sector_map: dict = {}
+    cached = _mc_get("sector_heatmap")
+    if cached:
+        return cached
 
-    for sym_info in symbols_data:
-        sym    = sym_info["symbol"]
+    symbols_data = await get_nifty50_symbols()
+
+    # Fetch all 50 stocks concurrently instead of sequentially
+    hists = await asyncio.gather(
+        *[_async_fetch_history(s['symbol'], period="5d", interval="1d") for s in symbols_data],
+        return_exceptions=True,
+    )
+
+    sector_map: dict = {}
+    for sym_info, hist in zip(symbols_data, hists):
+        sym    = sym_info['symbol']
         sector = sym_info.get("sector", "Unknown")
         try:
-            hist = yf.Ticker(sym).history(period="5d", interval="1d")
-            if hist.empty or len(hist) < 2:
+            if isinstance(hist, Exception) or hist.empty or len(hist) < 2:
                 continue
             open_price  = safe_float(hist["Close"].iloc[0])
             close_price = safe_float(hist["Close"].iloc[-1])
@@ -1626,7 +2158,7 @@ async def get_sector_heatmap(request: Request):
         })
 
     sectors.sort(key=lambda x: x["avg_change_percent"], reverse=True)
-    return {
+    result = {
         "sectors":       sectors,
         "total_sectors": len(sectors),
         "market_breadth": {
@@ -1634,6 +2166,8 @@ async def get_sector_heatmap(request: Request):
             "negative_sectors": neg_count,
         },
     }
+    _mc_set("sector_heatmap", result)
+    return result
 
 
 
@@ -1657,7 +2191,7 @@ async def get_morning_brief(request: Request, user: AuthenticatedUser = Depends(
         us_indices = {}
         for sym, name in [("^GSPC", "S&P 500"), ("^IXIC", "Nasdaq")]:
             try:
-                hist = yf.Ticker(sym).history(period="2d")
+                hist = resilient_fetch_history(sym, period="2d")
                 if not hist.empty and len(hist) > 1:
                     c = safe_float(hist['Close'].iloc[-1])
                     p = safe_float(hist['Close'].iloc[-2])
@@ -1823,17 +2357,25 @@ async def evaluate_alerts(user: AuthenticatedUser = Depends(get_current_user)):
 # ---------------------------------------------------------------------------
 from broker import get_broker, OrderRequest as BrokerOrderRequest
 from cryptography.fernet import Fernet
-from fastapi import WebSocket, WebSocketDisconnect
 
-import asyncio
-
-_FERNET_KEY = os.environ.get("FERNET_KEY", "").strip() or Fernet.generate_key().decode()
-_fernet = Fernet(_FERNET_KEY.encode() if isinstance(_FERNET_KEY, str) else _FERNET_KEY)
+_FERNET_KEY = (os.environ.get("FERNET_KEY") or os.environ.get("FERNET_ENCRYPTION_KEY", "")).strip()
+if not _FERNET_KEY:
+    logger.warning(
+        "FERNET_KEY / FERNET_ENCRYPTION_KEY not set. Broker credential encryption disabled. "
+        "Generate a key with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+    )
+    _fernet = None
+else:
+    _fernet = Fernet(_FERNET_KEY.encode() if isinstance(_FERNET_KEY, str) else _FERNET_KEY)
 
 def _encrypt(value: str) -> str:
+    if _fernet is None:
+        raise HTTPException(status_code=503, detail="Broker encryption not configured. Set FERNET_KEY in backend .env.")
     return _fernet.encrypt(value.encode()).decode()
 
 def _decrypt(value: str) -> str:
+    if _fernet is None:
+        raise HTTPException(status_code=503, detail="Broker encryption not configured. Set FERNET_KEY in backend .env.")
     return _fernet.decrypt(value.encode()).decode()
 
 class BrokerConnectRequest(BaseModel):
@@ -1997,53 +2539,8 @@ async def broker_search_symbol(exchange: str = "NSE", q: str = Query(..., min_le
 # Phase 3.2 — WebSocket Real-Time Price Feed
 # ---------------------------------------------------------------------------
 
-from collections import defaultdict
-
-class ConnectionManager:
-    """Manages active WebSocket connections and per-symbol subscriptions."""
-
-    def __init__(self):
-        self.connections: dict[str, WebSocket] = {}        # conn_id -> ws
-        self.subscriptions: dict[str, set] = defaultdict(set)  # conn_id -> {symbols}
-        self.symbol_conns: dict[str, set] = defaultdict(set)   # symbol -> {conn_ids}
-
-    async def connect(self, conn_id: str, ws: WebSocket):
-        await ws.accept()
-        self.connections[conn_id] = ws
-
-    def disconnect(self, conn_id: str):
-        self.connections.pop(conn_id, None)
-        syms = self.subscriptions.pop(conn_id, set())
-        for sym in syms:
-            self.symbol_conns[sym].discard(conn_id)
-
-    def subscribe(self, conn_id: str, symbols: list[str]):
-        for sym in symbols:
-            self.subscriptions[conn_id].add(sym)
-            self.symbol_conns[sym].add(conn_id)
-
-    def unsubscribe(self, conn_id: str, symbols: list[str]):
-        for sym in symbols:
-            self.subscriptions[conn_id].discard(sym)
-            self.symbol_conns[sym].discard(conn_id)
-
-    def subscribed_symbols(self) -> set:
-        return set(self.symbol_conns.keys())
-
-    async def send(self, conn_id: str, message: dict):
-        ws = self.connections.get(conn_id)
-        if ws:
-            try:
-                await ws.send_json(message)
-            except Exception:
-                self.disconnect(conn_id)
-
-    async def broadcast_to_symbol(self, symbol: str, message: dict):
-        for conn_id in list(self.symbol_conns.get(symbol, [])):
-            await self.send(conn_id, message)
-
-
-ws_manager = ConnectionManager()
+# WebSocket manager is imported from websocket_handler.py
+# from websocket_handler import ws_manager
 
 
 def _ist_market_status() -> str:
@@ -2061,73 +2558,226 @@ def _ist_market_status() -> str:
     return "closed"
 
 
-async def _price_polling_task():
-    """Background task: poll yfinance every 5s for subscribed symbols."""
-    while True:
-        await asyncio.sleep(5)
-        symbols = ws_manager.subscribed_symbols()
-        if not symbols:
-            continue
-        try:
-            tickers = yf.Tickers(" ".join(symbols))
-            for sym in symbols:
-                try:
-                    info = tickers.tickers[sym].fast_info
-                    price  = safe_float(info.last_price)
-                    change = safe_float(info.three_month_return)
-                    volume = safe_float(getattr(info, "last_volume", None))
-                    await ws_manager.broadcast_to_symbol(sym, {
-                        "type":   "price_update",
-                        "symbol": sym,
-                        "data":   {"price": price, "change": change, "volume": volume},
-                    })
-                except Exception:
-                    continue
-        except Exception as e:
-            logger.warning(f"Price polling error: {e}")
+# NOTE: Real-time price polling is handled inside websocket_prices (api_router /ws/prices)
 
 
-@app.on_event("startup")
-async def start_price_polling():
-    asyncio.create_task(_price_polling_task())
+# ---------------------------------------------------------------------------
+# Price Alerts Endpoints
+# ---------------------------------------------------------------------------
 
+class AlertCreateRequest(BaseModel):
+    symbol: str
+    target_price: float
+    condition: str  # "above" or "below"
+    note: str = ""
 
-@app.websocket("/ws/prices")
-async def ws_prices(websocket: WebSocket, token: str = ""):
-    """WebSocket endpoint for live price updates. Auth via Firebase token query param."""
-    conn_id = str(uuid.uuid4())
+@api_router.get("/alerts")
+async def get_alerts(user: AuthenticatedUser = Depends(get_current_user), active_only: bool = True):
+    """Get user's price alerts."""
+    if not alerts_manager:
+        raise HTTPException(status_code=503, detail="Alerts service not initialized")
+
+    alerts = await alerts_manager.get_user_alerts(user.uid, active_only)
+    return {"alerts": [a.dict() for a in alerts]}
+
+@api_router.post("/alerts")
+async def create_alert(request: AlertCreateRequest, user: AuthenticatedUser = Depends(get_current_user)):
+    """Create a new price alert."""
+    if not alerts_manager:
+        raise HTTPException(status_code=503, detail="Alerts service not initialized")
+
+    alert = await alerts_manager.create_alert(user.uid, AlertCreate(**request.dict()))
+    return {"message": "Alert created successfully", "alert": alert.dict()}
+
+@api_router.delete("/alerts/{alert_id}")
+async def delete_alert(alert_id: str, user: AuthenticatedUser = Depends(get_current_user)):
+    """Delete a price alert."""
+    if not alerts_manager:
+        raise HTTPException(status_code=503, detail="Alerts service not initialized")
+
+    success = await alerts_manager.delete_alert(user.uid, alert_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"message": "Alert deleted successfully"}
+
+@api_router.get("/alerts/triggered")
+async def get_triggered_alerts(user: AuthenticatedUser = Depends(get_current_user)):
+    """Get triggered (unread) alerts."""
+    if not alerts_manager:
+        raise HTTPException(status_code=503, detail="Alerts service not initialized")
+
+    alerts = await alerts_manager.get_triggered_alerts(user.uid)
+    return {"alerts": [a.dict() for a in alerts]}
+
+@api_router.post("/alerts/{alert_id}/read")
+async def mark_alert_read(alert_id: str, user: AuthenticatedUser = Depends(get_current_user)):
+    """Mark a triggered alert as read."""
+    if not alerts_manager:
+        raise HTTPException(status_code=503, detail="Alerts service not initialized")
+
+    success = await alerts_manager.mark_alert_read(user.uid, alert_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return {"message": "Alert marked as read"}
+
+# ---------------------------------------------------------------------------
+# News & Sentiment Analysis Endpoints
+# ---------------------------------------------------------------------------
+
+@api_router.get("/news/market")
+async def get_market_news_endpoint(request: Request, limit: int = 20):
+    """Get general market news with sentiment analysis."""
+    articles = get_market_news_feeds(limit)
+    return {"news": articles, "count": len(articles)}
+
+@api_router.get("/news/{symbol}")
+async def get_stock_news_endpoint(symbol: str, limit: int = 10):
+    """Get news for a specific stock symbol."""
+    symbol = sanitize_symbol(symbol)
+    news = await get_stock_news(symbol, limit=limit)
+    return {"news": news, "count": len(news)}
+
+@api_router.get("/sentiment/summary")
+async def get_sentiment_summary_endpoint():
+    """Get overall market sentiment summary."""
+    summary = await get_sentiment_summary()
+    return summary
+
+# ---------------------------------------------------------------------------
+# Fundamentals Data Endpoint
+# ---------------------------------------------------------------------------
+
+@api_router.get("/stocks/{symbol}/fundamentals")
+@limiter.limit("30/minute")
+async def get_stock_fundamentals(request: Request, symbol: str):
+    """
+    Get comprehensive fundamental data for a stock.
+    Includes valuation, profitability, financial health, and growth metrics.
+    """
+    sym = sanitize_symbol(symbol)
+
+    # Check cache first (10-minute TTL for fundamentals)
+    cache_key = make_cache_key("fundamentals", sym)
+    cached_data = await cache_manager.get(cache_key)
+    if cached_data:
+        return cached_data
+
     try:
-        if token:
-            decoded = firebase_auth.verify_id_token(token)
-            user_id = decoded["uid"]
-        else:
-            user_id = "anonymous"
-    except Exception:
-        await websocket.close(code=4001)
-        return
+        ticker = yf.Ticker(sym)
+        info = ticker.info
+        hist = resilient_fetch_history(sym, period="1y")
 
-    await ws_manager.connect(conn_id, websocket)
-    market_status = _ist_market_status()
-    await ws_manager.send(conn_id, {"type": "market_status", "data": {"status": market_status}})
+        if hist.empty:
+            raise HTTPException(status_code=404, detail="Stock not found")
+
+        # Extract fundamentals using existing function
+        fundamentals = extract_fundamentals(info)
+
+        # Add additional data
+        fundamentals["symbol"] = sym
+        fundamentals["company_name"] = info.get("longName", info.get("shortName", sym))
+        fundamentals["sector"] = info.get("sector", "N/A")
+        fundamentals["industry"] = info.get("industry", "N/A")
+        fundamentals["market_cap"] = safe_float(info.get("marketCap"))
+        fundamentals["current_price"] = safe_float(hist['Close'].iloc[-1])
+        fundamentals["52_week_high"] = safe_float(info.get("fiftyTwoWeekHigh"))
+        fundamentals["52_week_low"] = safe_float(info.get("fiftyTwoWeekLow"))
+        fundamentals["dividend_yield"] = safe_float(info.get("dividendYield"))
+        fundamentals["payout_ratio"] = safe_float(info.get("payoutRatio"))
+        fundamentals["beta"] = safe_float(info.get("beta"))
+        fundamentals["book_value"] = safe_float(info.get("bookValue"))
+        fundamentals["price_to_book"] = safe_float(info.get("priceToBook"))
+        fundamentals["enterprise_value"] = safe_float(info.get("enterpriseValue"))
+        fundamentals["ebitda"] = safe_float(info.get("ebitda"))
+        fundamentals["revenue"] = safe_float(info.get("totalRevenue"))
+        fundamentals["revenue_per_share"] = safe_float(info.get("revenuePerShare"))
+        fundamentals["quarterly_revenue_growth"] = safe_float(info.get("revenueQuarterlyGrowth"))
+        fundamentals["gross_profit"] = safe_float(info.get("grossProfits"))
+        fundamentals["free_cashflow"] = safe_float(info.get("freeCashflow"))
+        fundamentals["operating_cashflow"] = safe_float(info.get("operatingCashflow"))
+        fundamentals["earnings_growth"] = safe_float(info.get("earningsQuarterlyGrowth"))
+        fundamentals["current_ratio"] = safe_float(info.get("currentRatio"))
+        fundamentals["debt_to_equity"] = safe_float(info.get("debtToEquity"))
+        fundamentals["return_on_assets"] = safe_float(info.get("returnOnAssets"))
+        fundamentals["return_on_equity"] = safe_float(info.get("returnOnEquity"))
+        fundamentals["target_high_price"] = safe_float(info.get("targetHighPrice"))
+        fundamentals["target_low_price"] = safe_float(info.get("targetLowPrice"))
+        fundamentals["target_mean_price"] = safe_float(info.get("targetMeanPrice"))
+        fundamentals["recommendation"] = info.get("recommendationKey", "N/A")
+        fundamentals["number_of_analyst_opinions"] = info.get("numberOfAnalystOpinions")
+        fundamentals["timestamp"] = datetime.now(timezone.utc).isoformat()
+
+        # Cache for 10 minutes
+        await cache_manager.set(cache_key, fundamentals, timedelta(minutes=10))
+
+        return fundamentals
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching fundamentals for {sym}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ---------------------------------------------------------------------------
+# WebSocket Endpoint for Real-time Prices
+# ---------------------------------------------------------------------------
+
+@api_router.websocket("/ws/prices")
+async def websocket_prices(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time stock price updates.
+    Clients can subscribe to multiple symbols and receive live price updates.
+
+    Usage:
+        1. Connect to WebSocket
+        2. Send: {"type": "subscribe", "symbols": ["RELIANCE.NS", "TCS.NS"]}
+        3. Receive: {"type": "price_update", "symbol": "RELIANCE.NS", "data": {...}}
+        4. Send: {"type": "unsubscribe", "symbols": ["RELIANCE.NS"]}
+        5. Send: {"type": "ping"} to keep connection alive
+    """
+    await ws_manager.connect(websocket, [])
+
     try:
         while True:
-            msg = await websocket.receive_json()
-            action  = msg.get("action")
-            symbols = msg.get("symbols", [])
-            if action == "subscribe":
-                ws_manager.subscribe(conn_id, symbols)
-                await ws_manager.send(conn_id, {"type": "subscribed", "symbols": symbols})
-            elif action == "unsubscribe":
-                ws_manager.unsubscribe(conn_id, symbols)
-                await ws_manager.send(conn_id, {"type": "unsubscribed", "symbols": symbols})
-            elif action == "ping":
-                await ws_manager.send(conn_id, {"type": "pong"})
-    except WebSocketDisconnect:
-        ws_manager.disconnect(conn_id)
-    except Exception as e:
-        logger.warning(f"WS error {conn_id}: {e}")
-        ws_manager.disconnect(conn_id)
+            try:
+                # Receive message from client
+                data = await websocket.receive_json()
+                msg_type = data.get("type")
+                symbols = data.get("symbols", [])
 
+                if msg_type == "subscribe":
+                    # Validate and sanitize symbols
+                    valid_symbols = []
+                    for sym in symbols:
+                        try:
+                            sanitized = sanitize_symbol(sym)
+                            valid_symbols.append(sanitized)
+                        except HTTPException:
+                            pass
+
+                    if valid_symbols:
+                        await ws_manager.subscribe(websocket, valid_symbols)
+                        await websocket.send_json({
+                            "type": "subscribed",
+                            "symbols": valid_symbols
+                        })
+
+                elif msg_type == "unsubscribe":
+                    await ws_manager.unsubscribe(websocket, symbols)
+                    await websocket.send_json({
+                        "type": "unsubscribed",
+                        "symbols": symbols
+                    })
+
+                elif msg_type == "ping":
+                    await websocket.send_json({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()})
+
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"WebSocket error: {e}")
+                break
+    finally:
+        await ws_manager.disconnect(websocket)
 
 # ---------------------------------------------------------------------------
 # Phase 3.3 — F&O Options Chain + Greeks
@@ -2236,6 +2886,3 @@ _allowed_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "http:/
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=_allowed_origins, allow_methods=["GET", "POST", "DELETE", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
